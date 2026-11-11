@@ -108,7 +108,7 @@ export function Header() {
               <ButtonLink href="/contact-us" variant="line" className="h-10 px-4.5 text-[13.5px]">
                 Contactez-nous
               </ButtonLink>
-              <ButtonLink href={SITE.preRegistration} variant="brand" external className="h-10 px-4.5 text-[13.5px]">
+              <ButtonLink href={SITE.preRegistration} variant="brand" className="h-10 px-4.5 text-[13.5px]">
                 Pré-inscription
               </ButtonLink>
             </>
@@ -124,7 +124,6 @@ export function Header() {
               <ButtonLink
                 href={SITE.preRegistration}
                 variant="solid"
-                external
                 className="h-10 px-4.5 text-[13.5px] font-semibold!"
               >
                 Pré-inscription
@@ -181,7 +180,7 @@ export function Header() {
             <ButtonLink href="/contact-us" variant={light ? "line" : "ghost"}>
               Contactez-nous
             </ButtonLink>
-            <ButtonLink href={SITE.preRegistration} variant={light ? "brand" : "solid"} external>
+            <ButtonLink href={SITE.preRegistration} variant={light ? "brand" : "solid"}>
               Pré-inscription
             </ButtonLink>
           </div>

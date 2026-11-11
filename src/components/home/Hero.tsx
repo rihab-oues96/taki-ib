@@ -210,8 +210,8 @@ export function Hero() {
           {...fade(1.1)}
           className="mt-[22px] max-w-[560px] text-[17px] leading-[1.55] text-paper/[.78] max-[640px]:text-[15.5px]"
         >
-          Le Programme d&apos;éducation intermédiaire de l&apos;IB, un cadre multiculturel et un
-          accompagnement personnalisé, à Sahloul&nbsp;4, Sousse.
+          Les programmes de l&apos;IB, un cadre multiculturel et un accompagnement personnalisé,
+          à Sahloul&nbsp;4, Sousse.
         </motion.p>
         <motion.div
           {...fade(1.3)}
@@ -232,8 +232,6 @@ export function Hero() {
           </button>
           <a
             href={SITE.preRegistration}
-            target="_blank"
-            rel="noopener noreferrer"
             className={`${BTN} border-paper bg-paper text-navy hover:border-brand hover:bg-brand hover:text-white`}
           >
             Pré-inscription

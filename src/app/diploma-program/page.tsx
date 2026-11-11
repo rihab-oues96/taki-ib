@@ -52,7 +52,7 @@ export default function DiplomaPage() {
           Le Programme du diplôme de l&apos;IB prépare les élèves à l&apos;enseignement supérieur et les encourage à devenir des citoyens du monde responsables et engagés.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3 max-sm:flex-col">
-          <ButtonLink href={SITE.preRegistration} variant="navy" external>Pré-inscription</ButtonLink>
+          <ButtonLink href={SITE.preRegistration} variant="navy">Pré-inscription</ButtonLink>
           <ButtonLink href="/contact-us" variant="line">Contactez-nous</ButtonLink>
         </div>
         <p className="mt-[26px] inline-flex items-center gap-3 rounded-full bg-[#f4f8fb] py-2 pl-2.5 pr-4 text-sm text-[#5d6f7c] max-sm:flex-wrap max-sm:justify-center">
@@ -307,7 +307,7 @@ export default function DiplomaPage() {
               <p className="mt-4 text-[17px] leading-[1.6] text-white/75">Rejoignez une communauté d&apos;apprenants internationaux et offrez à votre enfant les meilleures chances de réussite dans un monde globalisé.</p>
             </div>
             <div className="flex flex-col items-start gap-3 max-sm:items-stretch">
-              <ButtonLink href={SITE.preRegistration} variant="solid" external className="sm:min-w-60">Pré-inscription</ButtonLink>
+              <ButtonLink href={SITE.preRegistration} variant="solid" className="sm:min-w-60">Pré-inscription</ButtonLink>
               <ButtonLink href="/contact-us" variant="ghost" className="sm:min-w-60">Contactez-nous</ButtonLink>
               <p className="mt-1.5 text-[14.5px] text-white/75">
                 Ou appelez les admissions au{" "}

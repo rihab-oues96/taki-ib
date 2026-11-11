@@ -72,7 +72,7 @@ export default function PeiPage() {
           Le programme d&apos;éducation intermédiaire est de renommée mondiale pour son excellence académique. Il stimule la pensée critique, la curiosité intellectuelle et la compréhension interculturelle.
         </p>
         <div className="mt-7 flex flex-wrap justify-center gap-3 max-sm:flex-col">
-          <ButtonLink href={SITE.preRegistration} variant="navy" external>Pré-inscription</ButtonLink>
+          <ButtonLink href={SITE.preRegistration} variant="navy">Pré-inscription</ButtonLink>
           <ButtonLink href="/contact-us" variant="line">Contactez-nous</ButtonLink>
         </div>
         <p className="mt-[26px] inline-flex items-center gap-3 rounded-full bg-[#f4f8fb] py-2 pl-2.5 pr-4 text-sm text-[#5d6f7c] max-sm:flex-wrap max-sm:justify-center">
@@ -293,7 +293,7 @@ export default function PeiPage() {
               <p className="mt-4 text-[17px] leading-[1.6] text-white/75">Découvrez comment le PEI peut accompagner le développement académique et personnel de votre enfant pendant ces années essentielles.</p>
             </div>
             <div className="flex flex-col items-start gap-3 max-sm:items-stretch">
-              <ButtonLink href={SITE.preRegistration} variant="solid" external className="sm:min-w-60">Pré-inscription</ButtonLink>
+              <ButtonLink href={SITE.preRegistration} variant="solid" className="sm:min-w-60">Pré-inscription</ButtonLink>
               <ButtonLink href="/contact-us" variant="ghost" className="sm:min-w-60">Contactez-nous</ButtonLink>
               <p className="mt-1.5 text-[14.5px] text-white/75">
                 Ou appelez les admissions au{" "}

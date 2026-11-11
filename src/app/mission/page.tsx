@@ -22,7 +22,7 @@ export default function MissionPage() {
         lead="Notre engagement est simple : une éducation rigoureuse, humaine et ouverte sur le monde, dans le cadre du Baccalauréat International."
       >
         <ButtonLink href="/middle-education-program">Découvrir notre programme</ButtonLink>
-        <ButtonLink href={SITE.preRegistration} variant="line" external>
+        <ButtonLink href={SITE.preRegistration} variant="line">
           Pré-inscription
         </ButtonLink>
       </PageHero>

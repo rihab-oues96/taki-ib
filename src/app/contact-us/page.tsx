@@ -38,7 +38,7 @@ export default function ContactPage() {
                 <li className="flex gap-4"><Clock className="mt-1 shrink-0 text-sun" size={20} aria-hidden /><span className="text-white/75">Appelez-nous ou écrivez-nous pour convenir d&apos;un horaire de visite qui vous convient.</span></li>
               </ul>
               <div className="mt-8 flex flex-wrap gap-3">
-                <ButtonLink href={SITE.preRegistration} external variant="sun">Pré-inscription en ligne</ButtonLink>
+                <ButtonLink href={SITE.preRegistration} variant="sun">Pré-inscription en ligne</ButtonLink>
               </div>
             </div>
             <div className="rounded-3xl bg-[#f4f8fb] p-8">

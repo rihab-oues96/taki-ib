@@ -7,7 +7,7 @@ export const SITE = {
   email: "contact@ibtakiacademyschool.com",
   address: "Sahloul 4, Sousse, Tunisie",
   mapQuery: "Taki Academy International School Sahloul Sousse",
-  preRegistration: "https://ibtakiacademyschool.com/en/admission",
+  preRegistration: "/admission",
   studentPortal: "https://ib.webschool.tn/student/login",
   parentPortal: "https://ib.webschool.tn/parent/login",
   heroVideoId: "JKW2o7yF1es",

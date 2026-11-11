@@ -252,7 +252,7 @@ export function Inscription() {
               </p>
             </div>
             <div className="ins__ctas">
-              <a className="ins__btn" href={SITE.preRegistration} target="_blank" rel="noopener">
+              <a className="ins__btn" href={SITE.preRegistration}>
                 Pré-inscription
               </a>
               <Link className="ins__btn ins__btn--ghost" href="/contact-us">

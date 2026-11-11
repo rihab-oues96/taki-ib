@@ -75,7 +75,7 @@ export function Footer() {
           <nav aria-label="Familles">
             <h2 className="mb-5 text-sm font-bold uppercase tracking-widest text-brand-light">Familles</h2>
             <ul className={col}>
-              <li><a href={SITE.preRegistration} target="_blank" rel="noopener noreferrer">Pré-inscription</a></li>
+              <li><a href={SITE.preRegistration}>Pré-inscription</a></li>
               <li><Link href="/contact-us#visit">Réserver une visite de l&apos;école</Link></li>
               <li><a href={SITE.parentPortal} target="_blank" rel="noopener noreferrer">Portail parents</a></li>
               <li><a href={SITE.studentPortal} target="_blank" rel="noopener noreferrer">Portail élèves</a></li>

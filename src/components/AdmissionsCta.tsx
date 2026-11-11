@@ -26,7 +26,7 @@ export function AdmissionsCta() {
           </p>
           <div className="mt-9 flex flex-wrap gap-3">
             <ButtonLink href="/contact-us#visit" variant="sun">Réserver une visite de l&apos;école</ButtonLink>
-            <ButtonLink href={SITE.preRegistration} variant="ghost" external>Pré-inscription en ligne</ButtonLink>
+            <ButtonLink href={SITE.preRegistration} variant="ghost">Pré-inscription en ligne</ButtonLink>
           </div>
           <p className="mt-6 text-white/65">
             Ou appelez les admissions au <a className="font-bold text-white underline underline-offset-4" href={SITE.phoneHref}>{SITE.phone}</a>

@@ -157,7 +157,7 @@ export default async function PostPage({ params }: PageProps<"/actuality/[slug]"
               </p>
             </div>
             <div className="flex flex-col items-stretch gap-3 lg:items-start">
-              <ButtonLink href={SITE.preRegistration} variant="solid" external className="lg:min-w-60">Pré-inscription</ButtonLink>
+              <ButtonLink href={SITE.preRegistration} variant="solid" className="lg:min-w-60">Pré-inscription</ButtonLink>
               <ButtonLink href="/contact-us" variant="ghost" className="lg:min-w-60">Contactez-nous</ButtonLink>
               <p className="mt-1.5 text-[14.5px] text-white/75">
                 Ou appelez les admissions au{" "}

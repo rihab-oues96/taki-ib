@@ -86,7 +86,7 @@ export default function ScholarLifePage() {
         lead="À TakiAcademy, la vie scolaire s’appuie sur la communauté et l’inclusion. Elle intègre les valeurs de l’IB pour valoriser chaque élève et favoriser son engagement."
       >
         <ButtonLink href="#videos" variant="navy">Voir toutes nos vidéos</ButtonLink>
-        <ButtonLink href={SITE.preRegistration} external variant="line">Pré-inscription</ButtonLink>
+        <ButtonLink href={SITE.preRegistration} variant="line">Pré-inscription</ButtonLink>
       </PageHero>
 
       <VieReel />
