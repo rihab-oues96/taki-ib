@@ -124,8 +124,8 @@ export function Hero() {
     setPaused((p) => !p);
   };
 
-  const words1 = "Préparer votre enfant".split(" ");
-  const words2 = "à réussir partout dans le monde".split(" ");
+  const words1 = "L’excellence éducative".split(" ");
+  const words2 = "au cœur de notre programme IB".split(" ");
 
   const fade = (delay: number) => ({
     initial: reduce ? (false as const) : { opacity: 0, y: 14 },
@@ -183,7 +183,7 @@ export function Hero() {
           {...fade(0.1)}
           className="mb-[18px] inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-brand-light"
         >
-          Collège &amp; lycée IB · Sousse
+          TakiAcademy International School - IB
         </motion.p>
         <h1 className="text-[48px] font-semibold leading-[1.08] tracking-[-0.025em] max-[640px]:text-[34px]">
           <span className="block">
@@ -195,9 +195,14 @@ export function Hero() {
           </span>
           <span className="block text-brand-light">
             {words2.map((w, i) => (
-              <Word key={w + i} i={i + words1.length} reduce={!!reduce}>
-                {w}
-              </Word>
+              <span
+                key={w + i}
+                className={i >= words2.length - 2 ? "text-sun" : undefined}
+              >
+                <Word i={i + words1.length} reduce={!!reduce}>
+                  {w}
+                </Word>
+              </span>
             ))}
           </span>
         </h1>

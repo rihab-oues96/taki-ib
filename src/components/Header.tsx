@@ -53,26 +53,15 @@ export function Header() {
         className="mx-auto flex h-20 w-[min(1320px,100%-2rem)] items-center justify-between gap-8 sm:w-[min(1320px,100%-3rem)]"
       >
         <Link href="/" aria-label={`${SITE.name} — accueil`} className="shrink-0">
-          {light ? (
-            <Image
-              src="/brand/logo-light.svg"
-              alt={SITE.name}
-              width={180}
-              height={72}
-              priority
-              unoptimized
-              className="h-12 w-auto sm:h-14"
-            />
-          ) : (
-            <Image
-              src="/brand/logo.png"
-              alt={SITE.name}
-              width={180}
-              height={72}
-              priority
-              className="h-12 w-auto sm:h-14"
-            />
-          )}
+          <Image
+            src="/brand/logo-light.svg"
+            alt={SITE.name}
+            width={180}
+            height={72}
+            priority
+            unoptimized
+            className="h-12 w-auto sm:h-14"
+          />
         </Link>
 
         <ul
