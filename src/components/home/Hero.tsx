@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useSite } from "@/components/SiteProvider";
 import type { HeroContent } from "@/lib/content/home";
+import { isVideoFile } from "@/lib/content/videos";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
@@ -33,13 +34,16 @@ export function Hero({ content: c }: { content: HeroContent }) {
   const [film, setFilm] = useState(false);
   const [prog, setProg] = useState<number | null>(null);
   const bg = useRef<HTMLIFrameElement>(null);
+  const bgFile = useRef<HTMLVideoElement>(null);
+  // The background is either a YouTube video or a file uploaded in the backoffice.
+  const isFile = isVideoFile(site.heroVideoId);
   const dock = useRef<HTMLElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   const chipEl = useRef<HTMLElement | null>(null);
 
   // N'afficher la vidéo d'arrière-plan qu'une fois que YouTube confirme sa lecture.
   useEffect(() => {
-    if (reduce) return;
+    if (reduce || isFile) return;
     const onMsg = (e: MessageEvent) => {
       if (!/youtube(-nocookie)?\.com$/.test(new URL(e.origin).hostname)) return;
       try {
@@ -61,7 +65,7 @@ export function Hero({ content: c }: { content: HeroContent }) {
       window.removeEventListener("message", onMsg);
       clearInterval(t);
     };
-  }, [reduce]);
+  }, [reduce, isFile]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -101,6 +105,12 @@ export function Hero({ content: c }: { content: HeroContent }) {
   }, [prog]);
 
   const toggle = () => {
+    if (isFile) {
+      if (paused) void bgFile.current?.play().catch(() => undefined);
+      else bgFile.current?.pause();
+      setPaused((p) => !p);
+      return;
+    }
     bg.current?.contentWindow?.postMessage(
       JSON.stringify({
         event: "command",
@@ -130,9 +140,27 @@ export function Hero({ content: c }: { content: HeroContent }) {
       {/* Background video */}
       <div
         className="absolute inset-0 z-0 overflow-hidden bg-[#0b2230] bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url('https://i.ytimg.com/vi/${site.heroVideoId}/maxresdefault.jpg')` }}
+        style={isFile ? undefined : { backgroundImage: `url('https://i.ytimg.com/vi/${site.heroVideoId}/maxresdefault.jpg')` }}
       >
-        {!reduce && (
+        {isFile && (
+          <video
+            ref={bgFile}
+            src={site.heroVideoId}
+            title={c.video.backgroundTitle}
+            autoPlay={!reduce}
+            muted
+            loop
+            playsInline
+            preload={reduce ? "metadata" : "auto"}
+            tabIndex={-1}
+            aria-hidden
+            onPlaying={() => setPlaying(true)}
+            className={`pointer-events-none absolute inset-0 size-full object-cover transition-opacity duration-[1200ms] ease-out-expo ${
+              playing || reduce ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        )}
+        {!reduce && !isFile && (
           <iframe
             ref={bg}
             title={c.video.backgroundTitle}

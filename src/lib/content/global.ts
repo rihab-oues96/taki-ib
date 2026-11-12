@@ -13,6 +13,7 @@ export type SiteSettings = {
   preRegistration: string;
   studentPortal: string;
   parentPortal: string;
+  /** YouTube id, or the address of an uploaded video file (`/uploads/….mp4`). */
   heroVideoId: string;
   filmVideoId: string;
   social: { facebook: string; instagram: string; youtube: string; linkedin: string };
