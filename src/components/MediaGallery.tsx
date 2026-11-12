@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Camera, Video } from "lucide-react";
-import type { MediaItem } from "@/lib/site";
+import type { MediaItem } from "@/lib/content/vie-scolaire";
 import { Reveal } from "./Reveal";
 
 function Tile({ item }: { item: MediaItem }) {

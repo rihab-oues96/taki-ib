@@ -1,16 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const VALUES = [
-  ["Baccalauréat International", "Un cadre exigeant, reconnu dans le monde entier."],
-  ["Ouverture aux autres", "Le respect de chaque culture et de chaque point de vue."],
-  ["Un apprentissage intégral", "L’intellect, la créativité, l’activité et le service."],
-  ["Transmission de savoirs et de valeurs", "Transmettre les deux, main dans la main."],
-] as const;
+import type { ValuesContent } from "@/lib/content/mission";
 
 /** Navy card where the highlighted value travels down the list (Figma "Nos valeurs"). */
-export function ValuesCard() {
+export function ValuesCard({ content }: { content: ValuesContent }) {
+  const VALUES = content.items;
   const [on, setOn] = useState(0);
   const [hold, setHold] = useState(false);
 
@@ -18,17 +13,17 @@ export function ValuesCard() {
     if (hold || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const id = setInterval(() => setOn((v) => (v + 1) % VALUES.length), 2600);
     return () => clearInterval(id);
-  }, [hold]);
+  }, [hold, VALUES.length]);
 
   return (
     <div className="relative overflow-hidden rounded-[28px] bg-[radial-gradient(120%_140%_at_90%_0%,#14587a_0%,#0b3346_55%,#082a3a_100%)] px-5 py-[26px] text-white shadow-[0_40px_80px_-46px_rgba(11,51,70,.85)] sm:px-9 sm:py-[34px]">
-      <p className="mb-1.5 text-[13px] font-bold uppercase tracking-[0.08em] text-white/60">Ce qui nous guide</p>
+      <p className="mb-1.5 text-[13px] font-bold uppercase tracking-[0.08em] text-white/60">{content.cardTitle}</p>
       <ul className="relative">
         <span
           aria-hidden
           className="absolute top-[30px] bottom-[30px] left-[21px] w-0.5 bg-linear-to-b from-brand-light to-sun opacity-60"
         />
-        {VALUES.map(([t, d], i) => {
+        {VALUES.map(({ title: t, text: d }, i) => {
           const active = on === i;
           const last = i === VALUES.length - 1;
           return (

@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# taki-academy — public website
 
-## Getting Started
-
-First, run the development server:
+Next.js 16 (App Router, Cache Components) + Tailwind 4. All content comes from the CMS API (`../backoffice-back`); nothing editorial is hardcoded. See the [root README](../README.md) for the overall picture and the backoffice.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local   # CMS_API_URL + the three secrets shared with backoffice-back/.env
+npm install
+npm run dev                  # http://localhost:3000 — needs the API running
+npm run build && npm start   # the build prerenders pages from the API
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## How pages get their content
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`src/lib/cms.ts` is the only data layer:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```ts
+const c = await getPage<MissionContent>("mission");   // sections of a page, keyed by name
+const posts = await getEntries<Post>("posts");         // a list (articles, FAQ, videos…)
+const post = await getEntry<Post>("posts", slug);      // one item, or null
+const site = await getSite();                           // identity, contact details, socials
+```
 
-## Learn More
+- A section hidden in the backoffice is absent, so pages render `{c.hero && <Hero content={c.hero} />}`.
+- Types for each page live in `src/lib/content/`.
+- Client components receive content as props; site-wide settings are available through `useSite()`.
+- `rich(text)` (`src/components/Rich.tsx`) renders the editors' light markup (`*mot*`, `**mot**`, line breaks).
 
-To learn more about Next.js, take a look at the following resources:
+## Caching, publishing, preview
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- CMS reads are cached (`use cache`, tag `cms`, one hour) and pages are prerendered.
+- On publish the API calls `POST /api/revalidate` (secret header): the next visit gets fresh content.
+- `GET /api/preview?token=…&path=…` (opened by the backoffice's *Aperçu* button) verifies the token with the API and turns on Draft Mode: the cache is bypassed and drafts are shown, with a banner to leave preview.
+- Files uploaded in the backoffice are served from `/uploads/*` (rewritten to the API in `next.config.ts`); the original images remain in `public/`.
+- If the API cannot be reached, `src/app/error.tsx` shows a retry screen; `global-error.tsx` covers the shared layout.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Forms
 
-## Deploy on Vercel
+The contact, pre-registration and job application forms (`ContactForm`, `AdmissionForm`, `JobApplicationForm`, shared parts in `src/components/forms/`) post to this site's own `POST /api/submissions/<contact|admission|job>`. That route accepts same-origin requests only, limits the size, and forwards the form to the CMS API with `CMS_FORMS_SECRET` and the visitor's address; the API validates, stores and answers with a reference. Submissions are then handled in the backoffice under **Demandes reçues**.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- Every text of a form (labels, sending / confirmation / error messages, CV help) is edited in the backoffice, in the page's form section.
+- Field names in the forms are the names the API validates: a refused value comes back with the name of its input and is shown under it.
+- In production the site must sit behind a reverse proxy that sets `X-Real-IP` or `X-Forwarded-For`, otherwise the per-visitor rate limit cannot tell visitors apart.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `CTA-GUIDELINES.md` for the button rules and `AGENTS.md` before changing Next.js code.

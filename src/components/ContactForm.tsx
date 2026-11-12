@@ -1,77 +1,61 @@
 "use client";
 
-import { useState } from "react";
-import { Send } from "lucide-react";
-import { SITE } from "@/lib/site";
+import { control, Field, FormFooter, FormSuccess, Honeypot, PHONE_PATTERN } from "@/components/forms/FormParts";
+import { useFormSubmission, withFallback } from "@/components/forms/useFormSubmission";
+import type { ContactFormContent } from "@/lib/content/contact";
 
-const field =
-  "w-full rounded-2xl border border-navy/15 bg-white px-4 py-3.5 text-base outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/20";
+/** Contact form: sent to the admissions team, who find it in the backoffice. */
+export function ContactForm({ content }: { content: ContactFormContent }) {
+  const messages = withFallback(content.messages);
+  const form = useFormSubmission("contact", messages);
+  const { labels: l } = content;
+  const p = "contact";
 
-export function ContactForm() {
-  const [sent, setSent] = useState(false);
-
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const d = new FormData(e.currentTarget);
-    const body = [
-      `Nom : ${d.get("name")}`,
-      `Téléphone : ${d.get("phone")}`,
-      `E-mail : ${d.get("email")}`,
-      `Classe actuelle de l'enfant : ${d.get("grade") || "-"}`,
-      `Sujet : ${d.get("topic")}`,
-      "",
-      String(d.get("message") || ""),
-    ].join("\n");
-    window.location.href = `mailto:${SITE.email}?subject=${encodeURIComponent(
-      `${d.get("topic")} — ${d.get("name")}`,
-    )}&body=${encodeURIComponent(body)}`;
-    setSent(true);
-  }
+  if (form.status === "success") return <FormSuccess messages={messages} reference={form.reference} onAgain={form.reset} />;
 
   return (
-    <form onSubmit={onSubmit} className="grid gap-5 sm:grid-cols-2" aria-describedby="form-note">
-      <label className="grid gap-2 text-sm font-bold">
-        Nom du parent / tuteur
-        <input name="name" required autoComplete="name" className={field} />
-      </label>
-      <label className="grid gap-2 text-sm font-bold">
-        Téléphone
-        <input name="phone" type="tel" required autoComplete="tel" className={field} />
-      </label>
-      <label className="grid gap-2 text-sm font-bold">
-        E-mail
-        <input name="email" type="email" required autoComplete="email" className={field} />
-      </label>
-      <label className="grid gap-2 text-sm font-bold">
-        Classe actuelle de l&apos;enfant (facultatif)
-        <input name="grade" className={field} />
-      </label>
-      <label className="grid gap-2 text-sm font-bold sm:col-span-2">
-        Je souhaite
-        <select name="topic" className={field} defaultValue="Réserver une visite de l'école">
-          <option>Réserver une visite de l&apos;école</option>
-          <option>Me renseigner sur le Programme d&apos;éducation intermédiaire (PEI)</option>
-          <option>Me renseigner sur le Programme du diplôme (DP)</option>
-          <option>Commencer la pré-inscription</option>
-          <option>Autre demande</option>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void form.submit(e.currentTarget);
+      }}
+      onChange={form.onChange}
+      aria-busy={form.status === "sending"}
+      aria-describedby="form-note"
+      className="relative grid gap-5 sm:grid-cols-2"
+    >
+      <Honeypot />
+      <Field form={form} prefix={p} name="name" label={l.name}>
+        <input {...control(form, p, "name")} required maxLength={150} autoComplete="name" />
+      </Field>
+      <Field form={form} prefix={p} name="phone" label={l.phone}>
+        <input {...control(form, p, "phone")} type="tel" required pattern={PHONE_PATTERN} maxLength={25} autoComplete="tel" />
+      </Field>
+      <Field form={form} prefix={p} name="email" label={l.email}>
+        <input {...control(form, p, "email")} type="email" required maxLength={254} autoComplete="email" />
+      </Field>
+      <Field form={form} prefix={p} name="grade" label={l.grade}>
+        <input {...control(form, p, "grade")} maxLength={120} />
+      </Field>
+      <Field form={form} prefix={p} name="topic" label={l.topic} className="sm:col-span-2">
+        <select {...control(form, p, "topic")} required defaultValue={content.topics[0]}>
+          {content.topics.map((t) => (
+            <option key={t}>{t}</option>
+          ))}
         </select>
-      </label>
-      <label className="grid gap-2 text-sm font-bold sm:col-span-2">
-        Message
-        <textarea name="message" rows={5} className={field} />
-      </label>
+      </Field>
+      <Field form={form} prefix={p} name="message" label={l.message} className="sm:col-span-2">
+        <textarea {...control(form, p, "message")} rows={5} maxLength={5000} />
+      </Field>
       <div className="sm:col-span-2">
-        <button
-          type="submit"
-          className="inline-flex h-12 items-center gap-2 rounded-full bg-brand px-7 text-sm font-bold text-white transition-colors hover:bg-navy focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
-        >
-          Envoyer aux admissions <Send size={16} aria-hidden />
-        </button>
-        <p id="form-note" role="status" className="mt-4 text-sm text-ink-soft">
-          {sent
-            ? "Votre application de messagerie devrait s'ouvrir avec votre message prêt à être envoyé. Si ce n'est pas le cas, écrivez-nous à l'adresse indiquée sur cette page."
-            : "Cela ouvre votre application de messagerie avec votre message prêt à être envoyé à notre équipe des admissions."}
-        </p>
+        <FormFooter
+          form={form}
+          submit={content.submit}
+          note={content.note}
+          noteId="form-note"
+          messages={messages}
+          buttonClass="inline-flex h-12 items-center gap-2 rounded-full bg-brand px-7 text-sm font-bold text-white transition-colors hover:bg-navy focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+        />
       </div>
     </form>
   );

@@ -2,13 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pagination } from "@/components/Pagination";
-import { REEL_IDS, VIDEOS } from "@/lib/school-videos";
+import type { SchoolVideo } from "@/lib/content/videos";
+import type { VieReelContent } from "@/lib/content/vie-scolaire";
 import { VideoThumb } from "./VideoPlayer";
 
-const REEL = REEL_IDS.map((id) => VIDEOS.find((v) => v.id === id)).filter((v) => !!v);
-
 /** Swipeable carousel of short videos: scroll-snap, arrow buttons, drag with the mouse. */
-export function VieReel() {
+export function VieReel({ content, videos }: { content: VieReelContent; videos: SchoolVideo[] }) {
   const track = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState({ active: 0, count: 1 });
   const drag = useRef({ down: false, x: 0, left: 0, moved: false });
@@ -49,7 +48,7 @@ export function VieReel() {
   return (
     <section
       aria-roledescription="carrousel"
-      aria-label="Les dernières vidéos de l’école"
+      aria-label={content.ariaLabel}
       className="relative bg-white pb-8 pt-2 sm:pb-16"
     >
       <div
@@ -80,8 +79,8 @@ export function VieReel() {
         }}
         className="flex cursor-grab snap-x snap-mandatory gap-3.5 overflow-x-auto scroll-smooth px-4 pb-18 [scrollbar-width:none] active:cursor-grabbing sm:px-[max(24px,calc((100vw-1280px)/2))] [&::-webkit-scrollbar]:hidden"
       >
-        {REEL.map((v, i) => (
-          <div key={v.id} role="group" aria-roledescription="diapositive" aria-label={`${i + 1} sur ${REEL.length}`} className="flex-none snap-start scroll-ml-4 sm:scroll-ml-6">
+        {videos.map((v, i) => (
+          <div key={v.id} role="group" aria-roledescription="diapositive" aria-label={content.slideLabel.replace("{n}", String(i + 1)).replace("{total}", String(videos.length))} className="flex-none snap-start scroll-ml-4 sm:scroll-ml-6">
             <VideoThumb
               video={v}
               sizes="200px"
@@ -93,7 +92,7 @@ export function VieReel() {
         ))}
       </div>
 
-      <Pagination className="mt-2" count={page.count} active={page.active} onChange={goTo} label="Vidéos" />
+      <Pagination className="mt-2" count={page.count} active={page.active} onChange={goTo} label={content.paginationLabel} />
     </section>
   );
 }

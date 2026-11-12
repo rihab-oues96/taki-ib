@@ -1,35 +1,30 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const CORE = [
-  ["TdC · Théorie de la connaissance", "Développe l'esprit critique et la réflexion sur la nature du savoir."],
-  ["Le mémoire", "Un travail de recherche indépendant et approfondi."],
-  ["CAS · Créativité, activité, service", "Développe l'identité personnelle, l'engagement et le sens des responsabilités."],
-];
+import type { CoreItem } from "@/lib/content/programmes";
 
 /** Dark card listing the DP core; the highlighted dot travels down every 2.6s, or follows hover. */
-export function CoreList() {
+export function CoreList({ label, items }: { label: string; items: CoreItem[] }) {
   const [on, setOn] = useState(0);
   const [hold, setHold] = useState(false);
 
   useEffect(() => {
-    if (hold || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setTimeout(() => setOn((o) => (o + 1) % CORE.length), 2600);
+    if (hold || items.length === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setTimeout(() => setOn((o) => (o + 1) % items.length), 2600);
     return () => clearTimeout(t);
-  }, [on, hold]);
+  }, [on, hold, items.length]);
 
   return (
     <div className="relative overflow-hidden rounded-[28px] bg-[radial-gradient(120%_140%_at_90%_0%,#14587a_0%,#0b3346_55%,#082a3a_100%)] px-5 py-[26px] text-white shadow-[0_40px_80px_-46px_rgba(11,51,70,.85)] sm:px-9 sm:py-[34px]">
-      <p className="mb-1.5 text-[13px] font-bold uppercase tracking-[0.08em] text-white/60">Le tronc commun du DP</p>
+      <p className="mb-1.5 text-[13px] font-bold uppercase tracking-[0.08em] text-white/60">{label}</p>
       <ul className="relative" onMouseLeave={() => setHold(false)}>
         <span aria-hidden className="absolute bottom-[30px] left-[21px] top-[30px] w-0.5 bg-linear-to-b from-brand-light to-sun opacity-60" />
-        {CORE.map(([t, d], i) => {
+        {items.map((item, i) => {
           const active = i === on;
-          const last = i === CORE.length - 1;
+          const last = i === items.length - 1;
           return (
             <li
-              key={t}
+              key={i}
               onMouseEnter={() => { setHold(true); setOn(i); }}
               className={`relative grid grid-cols-[44px_1fr] items-start gap-[18px] py-4 ${i > 0 ? "border-t border-white/10" : ""}`}
             >
@@ -45,8 +40,8 @@ export function CoreList() {
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
-                <h3 className="mt-2 text-lg font-bold tracking-[-0.01em]">{t}</h3>
-                <p className="mt-1 text-[14.5px] leading-[1.5] text-white/70">{d}</p>
+                <h3 className="mt-2 text-lg font-bold tracking-[-0.01em]">{item.title}</h3>
+                <p className="mt-1 text-[14.5px] leading-[1.5] text-white/70">{item.text}</p>
               </div>
             </li>
           );

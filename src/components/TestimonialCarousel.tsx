@@ -4,21 +4,33 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Play } from "lucide-react";
 import { Pagination } from "./Pagination";
-import { TESTIMONIALS, TESTIMONIAL_VIDEOS } from "@/lib/site";
+import type { Testimonial, TestimonialsHeading, TestimonialVideo } from "@/lib/content/home-2";
 
 type Slide =
   | { kind: "video"; id: string; title: string; vertical: boolean; quote: string; name: string }
   | { kind: "quote"; quote: string; name: string };
 
-// Vidéos et témoignages écrits en alternance
-const SLIDES: Slide[] = TESTIMONIAL_VIDEOS.flatMap((v, i): Slide[] => [
-  { kind: "video", ...v, quote: "Découvrez le témoignage de notre communauté.", name: "Taki Academy" },
-  ...(TESTIMONIALS[i] ? [{ kind: "quote" as const, ...TESTIMONIALS[i] }] : []),
-]).concat(TESTIMONIALS.slice(TESTIMONIAL_VIDEOS.length).map((t) => ({ kind: "quote" as const, ...t })));
-
 const GAP = 32;
 
-export function TestimonialCarousel() {
+export function TestimonialCarousel({
+  testimonials,
+  videos,
+  labels,
+}: {
+  testimonials: Testimonial[];
+  videos: TestimonialVideo[];
+  labels: TestimonialsHeading;
+}) {
+  // Vidéos et témoignages écrits en alternance
+  const SLIDES: Slide[] = videos
+    .flatMap((v, i): Slide[] => {
+      const t = testimonials[i];
+      return [
+        { kind: "video", id: v.id, title: v.title, vertical: v.vertical, quote: labels.videoCaption, name: labels.videoAuthor },
+        ...(t ? [{ kind: "quote" as const, quote: t.quote, name: t.name }] : []),
+      ];
+    })
+    .concat(testimonials.slice(videos.length).map((t) => ({ kind: "quote" as const, quote: t.quote, name: t.name })));
   const [active, setActive] = useState(0);
   const [playing, setPlaying] = useState<number | null>(null);
   const go = (i: number) => {
@@ -28,13 +40,16 @@ export function TestimonialCarousel() {
   const [paused, setPaused] = useState(false);
   const reduce = useReducedMotion();
   const cur = SLIDES[active];
+  const count = SLIDES.length;
 
   // Défilement automatique, en pause pendant la lecture, au survol ou si mouvement réduit
   useEffect(() => {
     if (paused || playing !== null || reduce) return;
-    const t = setTimeout(() => setActive((a) => (a + 1) % SLIDES.length), 3000);
+    const t = setTimeout(() => setActive((a) => (a + 1) % count), 3000);
     return () => clearTimeout(t);
-  }, [active, paused, playing, reduce]);
+  }, [active, paused, playing, reduce, count]);
+
+  if (!cur) return null;
 
   return (
     <div
@@ -86,7 +101,7 @@ export function TestimonialCarousel() {
                         }
                       }}
                       className="group absolute inset-0 size-full"
-                      aria-label={`Lire : ${s.title}`}
+                      aria-label={`${labels.playPrefix} ${s.title}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -137,12 +152,12 @@ export function TestimonialCarousel() {
             onClick={() => setPlaying(active)}
             className="inline-flex h-12 items-center justify-center whitespace-nowrap rounded-full bg-linear-to-r from-[#51a0d8] to-[#8bc3e8] px-6 text-sm font-bold text-white shadow-[0_14px_32px_-10px_rgba(81,160,216,.5)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_36px_-10px_rgba(81,160,216,.65)] focus-visible:outline-3 focus-visible:outline-offset-[3px] focus-visible:outline-sun max-[640px]:w-full"
           >
-            Regarder le témoignage
+            {labels.watchLabel}
           </button>
         )}
       </div>
 
-      <Pagination className="mt-6" count={SLIDES.length} active={active} onChange={go} label="Témoignage" />
+      <Pagination className="mt-6" count={SLIDES.length} active={active} onChange={go} label={labels.paginationLabel} />
     </div>
   );
 }

@@ -3,38 +3,15 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { Eyebrow } from "@/components/ui";
-import { VIDEOS } from "@/lib/school-videos";
+import { rich } from "@/components/Rich";
+import type { SchoolVideo } from "@/lib/content/videos";
+import type { VieTabsContent } from "@/lib/content/vie-scolaire";
 import { VideoThumb } from "./VideoPlayer";
 
-const byId = (id: string) => VIDEOS.find((v) => v.id === id)!;
-
-const TABS = [
-  {
-    key: "sorties",
-    label: "Sorties scolaires",
-    kicker: "Sorties & actions humanitaires",
-    title: "Des apprentissages concrets, hors des murs",
-    text: [
-      "Les sorties pédagogiques donnent une dimension concrète aux apprentissages. Musées et sites patrimoniaux sont visités tout au long de l’année pour explorer les richesses naturelles et culturelles de notre environnement.",
-      "Engagés pour l’altruisme et la solidarité, nos élèves participent aussi à des actions humanitaires.",
-    ],
-    videos: ["jubsCcyooIQ", "OGEgn4PXJUQ"].map(byId),
-  },
-  {
-    key: "clubs",
-    label: "Les clubs",
-    kicker: "Sport, art & culture",
-    title: "Des passions qui créent des liens",
-    text: [
-      "Les clubs permettent aux élèves de cultiver leurs talents sportifs, artistiques ou culturels, au service de leur épanouissement et de leur réussite.",
-      "Ils renforcent le sentiment d’appartenance à l’école et les liens entre les élèves.",
-    ],
-    videos: ["FbQW6uC6Iv0", "x5IyEv4z2Ik"].map(byId),
-  },
-];
+type Tab = VieTabsContent["tabs"][number] & { videos: SchoolVideo[] };
 
 /** "Sorties scolaires / Les clubs" pill tabs with a sliding indicator. */
-export function VieTabs() {
+export function VieTabs({ content, tabs: TABS }: { content: VieTabsContent; tabs: Tab[] }) {
   const [cur, setCur] = useState(0);
   const barRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -65,9 +42,9 @@ export function VieTabs() {
     <section id="sorties" aria-labelledby="tvTitle" className="bg-white px-4 pb-18 pt-6 sm:pb-24">
       <div className="mx-auto w-[min(1200px,100%)]">
         <Reveal className="text-center">
-          <Eyebrow>Au-delà de la classe</Eyebrow>
+          <Eyebrow>{content.eyebrow}</Eyebrow>
           <h2 id="tvTitle" className="text-[clamp(30px,3.4vw,48px)] font-semibold leading-[1.08] tracking-[-0.035em] text-navy">
-            Apprendre en sortant, <em className="not-italic text-brand">grandir ensemble</em>.
+            {rich(content.title, "not-italic text-brand")}
           </h2>
         </Reveal>
 
@@ -75,7 +52,7 @@ export function VieTabs() {
           <div
             ref={barRef}
             role="tablist"
-            aria-label="Sorties et clubs"
+            aria-label={content.ariaLabel}
             className="relative mx-auto mt-9 flex w-max max-w-full rounded-full bg-[#eef6fb] p-2 shadow-[0_24px_48px_-36px_rgba(11,51,70,.35)]"
           >
             <span

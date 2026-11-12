@@ -5,53 +5,17 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ButtonLink } from "@/components/ui";
-import { SITE } from "@/lib/site";
-
-type Slide = {
-  name: string;
-  icon: number;
-  img: string;
-  title: string;
-  text: string;
-  cap: string;
-};
-
-const ILLU = "Photo d’illustration";
-
-const SLIDES: Slide[] = [
-  { name: "Le bâtiment", icon: 1, img: "building", title: "Un établissement sur 4 étages", text: "Notre collège et lycée à Sahloul 4, Sousse : 28 salles de classe réparties sur 4 étages, au service du Programme d'éducation intermédiaire.", cap: "Sahloul 4, Sousse" },
-  { name: "Cour centrale", icon: 2, img: "courtyard", title: "Une cour centrale au cœur de l’école", text: "Les coursives colorées s'ouvrent sur la cour centrale : un espace lumineux qui relie les étages et rythme la vie de l'école.", cap: "Les coursives autour de la cour" },
-  { name: "Salles de classe", icon: 1, img: "classes", title: "Des salles de classe lumineuses", text: "Des salles équipées où les enseignants accompagnent chaque élève au quotidien, au plus près de ses besoins.", cap: "Un cours en salle de classe" },
-  { name: "Salle de sport", icon: 6, img: "sport", title: "Une salle de sport", text: "Activités physiques et jeux collectifs pour bouger, coopérer et développer l'esprit d'équipe.", cap: "Jeu collectif en salle de sport" },
-  { name: "Clubs & activités", icon: 1, img: "clubs", title: "Clubs et vie scolaire", text: "Clubs et activités rassemblent les élèves tout au long de l'année, au-delà des cours.", cap: "Les élèves lors d’une activité de club" },
-  { name: "Bibliothèque", icon: 3, img: "library", title: "Une bibliothèque", text: "Un espace calme pour lire, faire des recherches et travailler en autonomie.", cap: ILLU },
-  { name: "Salle d’art", icon: 4, img: "art", title: "Une salle d’art", text: "Dessin, peinture et projets créatifs pour développer sa sensibilité artistique.", cap: ILLU },
-  { name: "Salle multimédia", icon: 5, img: "multimedia", title: "Une salle multimédia", text: "Des postes informatiques pour apprendre le numérique et mener des projets de recherche.", cap: ILLU },
-  { name: "Laboratoires", icon: 7, img: "labs", title: "Des laboratoires", text: "Des expériences pratiques pour comprendre les sciences par la manipulation.", cap: ILLU },
-  { name: "Cantine", icon: 8, img: "canteen", title: "Une cantine", text: "Un espace de restauration pour partager le déjeuner entre élèves.", cap: ILLU },
-];
-
-const FACILITIES = [
-  { label: "Salles de classe", icon: 1, slide: 2 },
-  { label: "Cour centrale", icon: 2, slide: 1 },
-  { label: "Salle de sport", icon: 6, slide: 3 },
-  { label: "Bibliothèque", icon: 3, slide: 5 },
-  { label: "Salle d'art", icon: 4, slide: 6 },
-  { label: "Salle multimédia", icon: 5, slide: 7 },
-  { label: "Laboratoires", icon: 7, slide: 8 },
-  { label: "Cantine", icon: 8, slide: 9 },
-];
-
-const STATS = [
-  ["28", "salles de classe"],
-  ["4", "étages"],
-  ["8", "espaces de vie"],
-];
+import { rich } from "@/components/Rich";
+import { useSite } from "@/components/SiteProvider";
+import type { AboutContent } from "@/lib/content/home";
 
 const DUR = 6000;
 const pad = (n: number) => String(n).padStart(2, "0");
 
-export function About() {
+export function About({ content: c }: { content: AboutContent }) {
+  const site = useSite();
+  const SLIDES = c.slides;
+  const L = c.labels;
   const [cur, setCur] = useState(0);
   const [shown, setShown] = useState(0); // text content, swapped after fade-out
   const [paused, setPaused] = useState(false);
@@ -68,7 +32,7 @@ export function About() {
       const n = (i + SLIDES.length) % SLIDES.length;
       return n === c ? c : n;
     });
-  }, []);
+  }, [SLIDES.length]);
 
   // swap text with a short fade
   useEffect(() => {
@@ -83,7 +47,7 @@ export function About() {
     if (hold) return;
     const t = setTimeout(() => setCur((c) => (c + 1) % SLIDES.length), DUR);
     return () => clearTimeout(t);
-  }, [cur, hold]);
+  }, [cur, hold, SLIDES.length]);
 
   useEffect(() => {
     const el = rootRef.current;
@@ -111,6 +75,7 @@ export function About() {
   const fading = cur !== shown;
   const s = SLIDES[shown];
   const active = SLIDES[cur];
+  if (!s || !active) return null;
 
   return (
     <section ref={rootRef} id="apropos" aria-labelledby="aboutTitle" className="relative overflow-hidden bg-white px-4 pb-12 pt-14 text-navy sm:px-6 max-[700px]:pb-16 max-[700px]:pt-[72px]">
@@ -124,17 +89,17 @@ export function About() {
             <div>
               <p className="mb-3 inline-flex items-center gap-2.5 text-[13.5px] font-medium uppercase tracking-[0.06em] text-[#7b8a96]">
                 <span className="h-1 w-[26px] rounded bg-sun" aria-hidden />
-                À propos de nous
+                {c.eyebrow}
               </p>
               <h2 id="aboutTitle" className="text-[clamp(30px,3.2vw,42px)] font-bold leading-[1.1] tracking-[-0.025em]">
-                TakiAcademy <em className="not-italic text-brand">International School</em>
+                {rich(c.title, "not-italic text-brand")}
               </h2>
             </div>
             <div className="max-w-[520px] min-[1081px]:justify-self-end min-[1081px]:pt-[32px]">
               <p className="text-[15.5px] leading-[1.6] text-[#5d6f7c]">
-                Basé à Sahloul 4 à Sousse, TakiAcademy International School est un collège et lycée privé qui propose le Programme d&apos;éducation intermédiaire dans un cadre multiculturel favorisant le développement personnel et académique.
+                {c.text}
               </p>
-              <ButtonLink href="/middle-education-program" variant="navy" className="mt-3.5 self-start">Notre Programme</ButtonLink>
+              <ButtonLink href={c.cta.href} variant="navy" className="mt-3.5 self-start">{c.cta.label}</ButtonLink>
             </div>
           </header>
         </Reveal>
@@ -153,10 +118,10 @@ export function About() {
               </div>
 
               <div className="mt-4 flex items-center gap-2">
-                <div role="tablist" aria-label="Choisir un espace" className="flex h-[30px] items-center gap-1.5 rounded-full bg-[#eef4f8] px-3">
+                <div role="tablist" aria-label={L.chooseSlide} className="flex h-[30px] items-center gap-1.5 rounded-full bg-[#eef4f8] px-3">
                   {SLIDES.map((sl, i) => (
                     <button
-                      key={sl.img}
+                      key={i}
                       role="tab"
                       aria-selected={i === cur}
                       aria-label={sl.name}
@@ -175,7 +140,7 @@ export function About() {
                 </div>
                 <button
                   onClick={() => setPaused((p) => !p)}
-                  aria-label={paused ? "Reprendre le diaporama" : "Mettre en pause le diaporama"}
+                  aria-label={paused ? L.resume : L.pause}
                   className="grid size-[30px] place-items-center rounded-full bg-[#eef4f8] transition-colors hover:bg-brand hover:text-white"
                 >
                   {paused ? <Play size={10} fill="currentColor" aria-hidden /> : <Pause size={10} fill="currentColor" aria-hidden />}
@@ -185,13 +150,13 @@ export function About() {
               <div ref={thumbsRef} className="mt-3 grid snap-x snap-mandatory auto-cols-[calc((100%-32px)/5)] grid-flow-col gap-2 overflow-x-auto px-0.5 pb-1.5 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {SLIDES.map((sl, i) => (
                   <button
-                    key={sl.img}
+                    key={i}
                     onClick={() => go(i)}
-                    aria-label={`Voir : ${sl.name}`}
+                    aria-label={`${L.viewSlide} ${sl.name}`}
                     className="group relative aspect-square snap-start overflow-hidden rounded-[10px] outline-none"
                   >
                     <Image
-                      src={`/media/about/${sl.img}.jpg`}
+                      src={sl.image}
                       alt=""
                       fill
                       sizes="80px"
@@ -206,7 +171,7 @@ export function About() {
             </div>
 
             <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-[#e3ebf0] pt-4">
-              {STATS.map(([n, l]) => (
+              {c.stats.map(({ value: n, label: l }) => (
                 <div key={l}>
                   <dt className="text-[clamp(30px,2.8vw,38px)] font-bold leading-none tracking-[-0.04em] text-brand">{n}</dt>
                   <dd className="mt-1.5 text-[13px] leading-[1.35] text-[#5d6f7c]">{l}</dd>
@@ -221,7 +186,7 @@ export function About() {
               ref={mediaRef}
               role="group"
               aria-roledescription="carrousel"
-              aria-label="Photos de l'école"
+              aria-label={L.carousel}
               tabIndex={0}
               onMouseEnter={() => setHovering(true)}
               onMouseLeave={() => setHovering(false)}
@@ -240,8 +205,8 @@ export function About() {
             >
               {SLIDES.map((sl, i) => (
                 <Image
-                  key={sl.img}
-                  src={`/media/about/${sl.img}.jpg`}
+                  key={i}
+                  src={sl.image}
                   alt={sl.name}
                   fill
                   priority={i === 0}
@@ -252,20 +217,20 @@ export function About() {
               <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(6,31,43,.35)_0%,transparent_26%,transparent_52%,rgba(6,31,43,.82)_100%)]" />
 
               <span className="absolute left-4 top-4 z-[2] inline-flex h-[34px] items-center gap-2 rounded-full bg-white/95 py-0 pl-1.5 pr-3.5 text-[13px] font-semibold backdrop-blur-sm">
-                <Image src={`/media/about/icon-${s.icon}.png`} alt="" width={24} height={24} className="size-6 rounded-full bg-[#eaf5fc] p-[3px]" />
+                <Image src={s.icon} alt="" width={24} height={24} className="size-6 rounded-full bg-[#eaf5fc] p-[3px]" />
                 <span>{s.name}</span>
               </span>
 
               <button
                 onClick={() => go(cur - 1)}
-                aria-label="Photo précédente"
+                aria-label={L.previous}
                 className="absolute left-3.5 top-1/2 z-[2] grid size-[38px] -translate-y-1/2 place-items-center rounded-full bg-white/90 transition hover:bg-brand hover:text-white min-[701px]:size-[42px] min-[701px]:-translate-x-1.5 min-[701px]:opacity-0 min-[701px]:group-hover/media:translate-x-0 min-[701px]:group-hover/media:opacity-100 min-[701px]:focus-visible:translate-x-0 min-[701px]:focus-visible:opacity-100"
               >
                 <ChevronLeft size={18} aria-hidden />
               </button>
               <button
                 onClick={() => go(cur + 1)}
-                aria-label="Photo suivante"
+                aria-label={L.next}
                 className="absolute right-3.5 top-1/2 z-[2] grid size-[38px] -translate-y-1/2 place-items-center rounded-full bg-white/90 transition hover:bg-brand hover:text-white min-[701px]:size-[42px] min-[701px]:translate-x-1.5 min-[701px]:opacity-0 min-[701px]:group-hover/media:translate-x-0 min-[701px]:group-hover/media:opacity-100 min-[701px]:focus-visible:translate-x-0 min-[701px]:focus-visible:opacity-100"
               >
                 <ChevronRight size={18} aria-hidden />
@@ -274,7 +239,7 @@ export function About() {
               <div className="absolute inset-x-5 bottom-[18px] z-[2] flex items-end justify-between gap-3 text-white">
                 <p className={`max-w-[58%] text-[15px] leading-[1.4] transition-opacity duration-[350ms] max-[700px]:hidden ${fading ? "opacity-0" : ""}`}>
                   <b className="mb-[3px] block text-[11.5px] font-semibold uppercase tracking-[0.12em] opacity-75">{s.name}</b>
-                  {s.cap}
+                  {s.caption}
                 </p>
                 <button
                   onClick={() => setVideo(true)}
@@ -284,7 +249,7 @@ export function About() {
                     <span className="absolute -inset-1 animate-pulse-ring rounded-full border-2 border-brand/55 motion-reduce:animate-none" aria-hidden />
                     <Play size={12} fill="currentColor" className="text-white group-hover/v:text-brand" aria-hidden />
                   </span>
-                  Visite en vidéo
+                  {L.videoCta}
                 </button>
               </div>
               <span className="sr-only">{active.name}</span>
@@ -295,14 +260,15 @@ export function About() {
         {/* facilities */}
         <Reveal>
           <div className="mt-8 grid grid-cols-2 gap-3 min-[701px]:grid-cols-4 min-[701px]:gap-2.5 min-[1081px]:grid-cols-8">
-            {FACILITIES.map((f) => {
-              const on = f.slide === cur;
+            {c.facilities.map((f) => {
+              const target = (f.slide ?? 1) - 1;
+              const on = target === cur;
               return (
                 <button
                   key={f.label}
-                  title="Voir la photo"
+                  title={L.facilityHint}
                   onClick={() => {
-                    go(f.slide);
+                    go(target);
                     mediaRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
                   }}
                   className={`flex min-h-[58px] cursor-pointer items-center gap-2.5 rounded-xl border bg-white px-2.5 py-2 text-left text-[13.5px] leading-tight shadow-[0_4px_12px_-8px_rgba(11,51,70,.18)] transition duration-300 hover:-translate-y-0.5 hover:border-[#bfe1f3] hover:shadow-[0_12px_22px_-14px_rgba(47,165,222,.55)] focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-brand ${
@@ -310,7 +276,7 @@ export function About() {
                   }`}
                 >
                   <span className="grid size-[38px] flex-none place-items-center rounded-[10px] bg-[#eef7fd]">
-                    <Image src={`/media/about/icon-${f.icon}.png`} alt="" width={26} height={26} className="size-[26px]" />
+                    <Image src={f.icon} alt="" width={26} height={26} className="size-[26px]" />
                   </span>
                   <span>{f.label}</span>
                 </button>
@@ -322,14 +288,14 @@ export function About() {
 
       {/* video modal */}
       {video && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(3,15,21,.86)] p-4" role="dialog" aria-modal="true" aria-label="Visite en vidéo" onClick={() => setVideo(false)}>
+        <div className="fixed inset-0 z-50 grid place-items-center bg-[rgba(3,15,21,.86)] p-4" role="dialog" aria-modal="true" aria-label={L.videoCta} onClick={() => setVideo(false)}>
           <div className="relative aspect-video w-[min(1100px,100%)] bg-black" onClick={(e) => e.stopPropagation()}>
             <button onClick={() => setVideo(false)} className="absolute -top-10 right-0 inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white">
-              <X size={16} aria-hidden /> Fermer
+              <X size={16} aria-hidden /> {L.close}
             </button>
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${SITE.filmVideoId}?autoplay=1&rel=0`}
-              title="Visite en vidéo - Taki Academy"
+              src={`https://www.youtube-nocookie.com/embed/${site.filmVideoId}?autoplay=1&rel=0`}
+              title={L.videoTitle}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
               className="absolute inset-0 size-full border-0"

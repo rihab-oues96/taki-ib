@@ -4,16 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { Reveal } from "@/components/Reveal";
-import { SITE } from "@/lib/site";
+import { rich } from "@/components/Rich";
+import { useSite } from "@/components/SiteProvider";
+import type { InscriptionContent } from "@/lib/content/home-2";
 
-const STEPS: { title: string; text: string; fields?: [string, string][] }[] = [
-  { title: "Choisir l’inscription", text: "Sélectionnez l’année scolaire, le niveau et la classe.", fields: [["Année", "2026 – 2027"], ["Classe", "PEI 2"]] },
-  { title: "Présenter votre enfant", text: "Son identité et son parcours scolaire.", fields: [["Prénom", "Yasmine"], ["Naissance", "12/03/2013"]] },
-  { title: "Vos coordonnées", text: "Celles du parent ou du responsable légal.", fields: [["Téléphone", "+216 •• ••• •••"], ["E-mail", "parent@exemple.com"]] },
-  { title: "Envoyer", text: "Validez le formulaire, notre équipe revient vers vous pour la suite." },
-];
-
-export function Inscription() {
+export function Inscription({ content }: { content: InscriptionContent }) {
+  const site = useSite();
+  const steps = content.steps;
   const jrRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,13 +21,13 @@ export function Inscription() {
     const base = svg.querySelector<SVGPathElement>(".jr__base")!;
     const prog = svg.querySelector<SVGPathElement>(".jr__prog")!;
     const dot = svg.querySelector<SVGCircleElement>(".jr__dot")!;
-    const steps = [...jr.querySelectorAll<HTMLElement>(".st")];
-    const nodes = steps.map((s) => s.querySelector<HTMLElement>(".st__node")!);
+    const stepEls = [...jr.querySelectorAll<HTMLElement>(".st")];
+    const nodes = stepEls.map((s) => s.querySelector<HTMLElement>(".st__node")!);
     const vline = jr.querySelector<HTMLElement>(".jr__vline");
     const dest = jr.querySelector<HTMLElement>(".jr__dest")!;
     const nEl = jr.querySelector<HTMLElement>(".jr__n")!;
     const bars = [...jr.querySelectorAll<HTMLElement>(".jr__bars i")];
-    const minis = steps.map((s) => [...s.querySelectorAll<HTMLElement>(".mini__f")]);
+    const minis = stepEls.map((s) => [...s.querySelectorAll<HTMLElement>(".mini__f")]);
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let arrived = false;
@@ -120,14 +117,15 @@ export function Inscription() {
 
     // smooth wave through the four step circles (desktop only)
     const build = () => {
-      if (innerWidth <= 1000) return;
+      if (innerWidth <= 1000 || nodes.length === 0) return;
       const r = jr.getBoundingClientRect();
       const pts = nodes.map((n) => {
         const b = n.getBoundingClientRect();
         return [b.left - r.left + b.width / 2, b.top - r.top + b.height / 2];
       });
       const start = [pts[0][0] - 40, pts[0][1]];
-      const end = [pts[3][0] + 175, pts[3][1] - 40];
+      const lastPt = pts[pts.length - 1];
+      const end = [lastPt[0] + 175, lastPt[1] - 40];
       dest.style.left = end[0] + "px";
       dest.style.top = end[1] + "px";
       const all = [start, ...pts, end];
@@ -163,13 +161,13 @@ export function Inscription() {
         dot.setAttribute("cx", String(pt.x));
         dot.setAttribute("cy", String(pt.y));
         let now = -1;
-        steps.forEach((s, i) => {
+        stepEls.forEach((s, i) => {
           const done = p >= stops[i] - 0.005;
           s.classList.toggle("is-done", done);
           if (done) now = i;
         });
         const end = p >= 0.995;
-        steps.forEach((s, i) => s.classList.toggle("is-now", i === now && !end));
+        stepEls.forEach((s, i) => s.classList.toggle("is-now", i === now && !end));
         counter(now, end);
         syncMini(now);
         if (end && !arrived) {
@@ -184,14 +182,14 @@ export function Inscription() {
       } else {
         // mobile / tablet: steps light up as they cross the middle of the screen
         let now = -1;
-        steps.forEach((s, i) => {
+        stepEls.forEach((s, i) => {
           const b = nodes[i].getBoundingClientRect();
           const done = b.top + b.height / 2 < innerHeight * 0.62;
           s.classList.toggle("is-done", done);
           if (done) now = i;
         });
-        const last = steps.length - 1;
-        steps.forEach((s, i) => s.classList.toggle("is-now", i === now));
+        const last = stepEls.length - 1;
+        stepEls.forEach((s, i) => s.classList.toggle("is-now", i === now));
         counter(now, now === last);
         syncMini(now);
         jr.classList.toggle("is-arrived", now === last);
@@ -235,7 +233,7 @@ export function Inscription() {
       clearTimeout(t);
       clearInterval(typer);
     };
-  }, []);
+  }, [steps.length]);
 
   return (
     <section className="ins" id="inscription" aria-labelledby="insTitle">
@@ -243,20 +241,21 @@ export function Inscription() {
         <Reveal>
           <div className="ins__head">
             <div>
-              <p className="ins__eyebrow">Pré-inscription</p>
+              <p className="ins__eyebrow">{content.eyebrow}</p>
               <h2 className="ins__title" id="insTitle">
-                Comment inscrire <em>votre enfant</em> ?
+                {rich(content.title)}
               </h2>
               <p className="ins__lead">
-                <b>4 étapes simples</b>, un seul formulaire en ligne.
+                <b>{content.leadStrong}</b>
+                {content.lead}
               </p>
             </div>
             <div className="ins__ctas">
-              <a className="ins__btn" href={SITE.preRegistration}>
-                Pré-inscription
+              <a className="ins__btn" href={content.primaryCta.href}>
+                {content.primaryCta.label}
               </a>
-              <Link className="ins__btn ins__btn--ghost" href="/contact-us">
-                Contactez-nous
+              <Link className="ins__btn ins__btn--ghost" href={content.secondaryCta.href}>
+                {content.secondaryCta.label}
               </Link>
             </div>
           </div>
@@ -266,15 +265,17 @@ export function Inscription() {
           <div className="jr" id="journey" ref={jrRef}>
             <p className="jr__count" aria-live="polite">
               <span>
-                Étape <b className="jr__n">1</b> sur 4
+                {content.stepWord} <b className="jr__n">1</b> {content.ofWord} {steps.length}
               </span>
               <span className="jr__bars" aria-hidden="true">
-                <i /><i /><i /><i />
+                {steps.map((_, i) => (
+                  <i key={i} />
+                ))}
               </span>
             </p>
             <div className="jr__dest" aria-hidden="true">
-              <Image src="/media/inscription/logo.svg" alt="" width={180} height={72} />
-              <span>Bienvenue&nbsp;!</span>
+              <Image src={content.logo} alt="" width={180} height={72} />
+              <span>{content.welcome}</span>
             </div>
             <svg className="jr__svg" aria-hidden="true">
               <path className="jr__base" />
@@ -285,25 +286,25 @@ export function Inscription() {
               <span />
             </div>
             <ol className="jr__steps">
-              {STEPS.map((s, i) => (
-                <li key={s.title} className={`st${i === STEPS.length - 1 ? " st--end" : ""}`}>
+              {steps.map((s, i) => (
+                <li key={i} className={`st${i === steps.length - 1 ? " st--end" : ""}`}>
                   <span className="st__node" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                   <div className="st__body">
                     <h3 className="st__title">{s.title}</h3>
                     <p className="st__text">{s.text}</p>
-                    {s.fields ? (
-                      <div className="mini" aria-label="À renseigner">
-                        {s.fields.map(([label, v]) => (
-                          <div className="mini__f" key={label}>
-                            <span>{label}</span>
-                            <b data-v={v} />
+                    {s.fields.length > 0 ? (
+                      <div className="mini" aria-label={content.fieldsLabel}>
+                        {s.fields.map((f) => (
+                          <div className="mini__f" key={f.label}>
+                            <span>{f.label}</span>
+                            <b data-v={f.value} />
                           </div>
                         ))}
                       </div>
                     ) : (
                       <span className="mini__send" aria-hidden="true">
-                        <span className="s1">Envoyer la demande →</span>
-                        <span className="s2">Demande envoyée ✓</span>
+                        <span className="s1">{content.sendLabel}</span>
+                        <span className="s2">{content.sentLabel}</span>
                       </span>
                     )}
                   </div>
@@ -315,8 +316,8 @@ export function Inscription() {
 
         <Reveal delay={0.1}>
           <p className="ins__help">
-            <span>Une question pendant l’inscription&nbsp;?</span> <strong>Notre équipe vous accompagne :</strong>{" "}
-            <a href={SITE.phoneHref}>{SITE.phone}</a>
+            <span>{content.helpQuestion}</span> <strong>{content.helpStrong}</strong>{" "}
+            <a href={site.phoneHref}>{site.phone}</a>
           </p>
         </Reveal>
       </div>
