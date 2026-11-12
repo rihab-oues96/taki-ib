@@ -2,7 +2,7 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 import { draftMode } from "next/headers";
 import type { GlobalContent } from "./content/global";
-import { youtubeId } from "./content/videos";
+import { isVideoFile, youtubeId } from "./content/videos";
 
 /**
  * Data layer for the CMS (backoffice-back). Every piece of website content comes from here.
@@ -44,9 +44,12 @@ async function request<T>(path: string, preview: boolean): Promise<T> {
 /** Keys that hold a YouTube video: `id` (videos, testimonials, `video.id`), `videoId(s)`, `heroVideoId`… */
 const VIDEO_KEY = /^(id|youtubeId|videoIds?|[a-z]+VideoId)$/;
 
-/** Replaces every YouTube link stored under a video key by its id. Bare ids are left as they are. */
+/**
+ * Replaces every YouTube link stored under a video key by its id. Bare ids are left as they are,
+ * and so are uploaded video files (the home page background video can be either).
+ */
 function videoIds<T>(value: T, key = ""): T {
-  if (typeof value === "string") return (VIDEO_KEY.test(key) ? youtubeId(value) : value) as T;
+  if (typeof value === "string") return (VIDEO_KEY.test(key) && !isVideoFile(value) ? youtubeId(value) : value) as T;
   if (Array.isArray(value)) return value.map((v) => videoIds(v, key)) as T;
   if (value && typeof value === "object") {
     return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, videoIds(v, k)])) as T;

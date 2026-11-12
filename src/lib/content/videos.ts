@@ -10,6 +10,11 @@ export type SchoolVideo = {
   thumb: string;
 };
 
+/** True for the address of a video file (uploaded in the backoffice or hosted elsewhere). */
+export function isVideoFile(ref: string): boolean {
+  return /^(\/(?!\/)|https?:\/\/)[^\s]+\.(mp4|webm)(\?[^\s]*)?$/i.test(ref.trim());
+}
+
 /**
  * Extracts the YouTube id from a full link (watch, youtu.be, shorts, embed, live).
  * A bare id is returned as is, so older content keeps working.
