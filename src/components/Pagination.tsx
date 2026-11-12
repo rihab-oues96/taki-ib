@@ -23,7 +23,7 @@ export function Pagination({
   if (count < 2) return null;
   const go = (i: number) => onChange(loop ? (i + count) % count : Math.min(count - 1, Math.max(0, i)));
   const arrow =
-    "grid size-9 place-items-center rounded-full text-navy transition hover:text-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sun disabled:pointer-events-none disabled:opacity-30";
+    "grid size-9 cursor-pointer place-items-center rounded-full text-navy transition hover:text-brand focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-sun disabled:pointer-events-none disabled:opacity-30";
 
   return (
     <nav aria-label="Pagination" className={`flex items-center justify-center gap-7 ${className}`}>
@@ -38,7 +38,7 @@ export function Pagination({
             onClick={() => go(i)}
             aria-label={`${label} ${i + 1}`}
             aria-current={i === active ? "true" : undefined}
-            className={`h-1.5 rounded-full transition-all duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun ${
+            className={`h-1.5 cursor-pointer rounded-full transition-all duration-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sun ${
               i === active ? "w-8 bg-navy" : "w-1.5 bg-[#adb5bd] hover:bg-navy/50"
             }`}
           />

@@ -2,20 +2,12 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-
-export const PEI_PANELS = [
-  { img: "/media/about/art.jpg", side: "Riche et varié", title: "Un programme riche et varié", text: "Un curriculum diversifié qui stimule l'apprentissage." },
-  { img: "/media/about/sport.jpg", side: "Méthodes dynamiques", title: "Des méthodes dynamiques", text: "Des approches pédagogiques actives et engageantes." },
-  { img: "/media/about/labs.jpg", side: "Par la recherche", title: "Apprendre par la recherche", text: "Explorer, questionner et découvrir activement." },
-  { img: "/media/about/classes.jpg", side: "Pensée critique", title: "La pensée critique", text: "Développer le raisonnement et l'application concrète." },
-];
+import type { Panel } from "@/lib/content/programmes";
 
 const DUR = 5000;
 
-export type Panel = { img: string; side: string; title: string; text: string };
-
-/** Accordion of 4 image panels; auto-advances while in view, pauses on hover/focus. */
-export function PeiPanels({ panels = PEI_PANELS }: { panels?: Panel[] }) {
+/** Accordion of image panels (content comes from the CMS); auto-advances while in view, pauses on hover/focus. */
+export function PeiPanels({ panels }: { panels: Panel[] }) {
   const [cur, setCur] = useState(0);
   const [hold, setHold] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -31,7 +23,7 @@ export function PeiPanels({ panels = PEI_PANELS }: { panels?: Panel[] }) {
   }, []);
 
   useEffect(() => {
-    if (hold || !visible || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (hold || !visible || panels.length === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setTimeout(() => setCur((c) => (c + 1) % panels.length), DUR);
     return () => clearTimeout(t);
   }, [cur, hold, visible, panels.length]);
@@ -49,7 +41,7 @@ export function PeiPanels({ panels = PEI_PANELS }: { panels?: Panel[] }) {
         return (
           <div
             role="button"
-            key={p.title}
+            key={i}
             ref={(el) => { refs.current[i] = el; }}
             tabIndex={0}
             aria-expanded={open}

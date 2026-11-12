@@ -3,11 +3,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pagination } from "./Pagination";
 import { PostCard } from "./PostCard";
-import type { Post } from "@/lib/site";
+import type { Post } from "@/lib/content/actualites";
 
 const GAP = 20;
 
-export function PostCarousel({ posts }: { posts: Post[] }) {
+export function PostCarousel({
+  posts,
+  labels,
+}: {
+  posts: Post[];
+  labels: { readLabel: string; carouselLabel: string; paginationLabel: string };
+}) {
   const track = useRef<HTMLUListElement>(null);
   const [active, setActive] = useState(0);
   const [count, setCount] = useState(posts.length);
@@ -46,16 +52,16 @@ export function PostCarousel({ posts }: { posts: Post[] }) {
         ref={track}
         onScroll={measure}
         className="-mx-1 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-1 pb-4 pt-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        aria-label="Articles et actualités"
+        aria-label={labels.carouselLabel}
       >
         {posts.map((p) => (
           <li key={p.slug} className="w-full shrink-0 snap-start sm:w-[calc((100%-1.25rem)/2)] lg:w-[calc((100%-3.75rem)/4)]">
-            <PostCard post={p} />
+            <PostCard post={p} readLabel={labels.readLabel} />
           </li>
         ))}
       </ul>
 
-      <Pagination className="mt-6" count={count} active={active} onChange={go} label="Articles" />
+      <Pagination className="mt-6" count={count} active={active} onChange={go} label={labels.paginationLabel} />
     </div>
   );
 }

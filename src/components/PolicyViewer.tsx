@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CalendarClock } from "lucide-react";
-import type { Policy } from "@/lib/policies";
+import type { Policy, PolicyViewerLabels } from "@/lib/content/politiques";
 
 /** `?activePolicy=N` is 1-based, matching the school's existing website. */
 function indexFromUrl(count: number) {
@@ -10,7 +10,7 @@ function indexFromUrl(count: number) {
   return Number.isInteger(n) && n >= 1 && n <= count ? n - 1 : 0;
 }
 
-export function PolicyViewer({ policies }: { policies: Policy[] }) {
+export function PolicyViewer({ policies, labels }: { policies: Policy[]; labels: PolicyViewerLabels }) {
   const [active, setActive] = useState(0);
   const panel = useRef<HTMLDivElement>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -51,17 +51,18 @@ export function PolicyViewer({ policies }: { policies: Policy[] }) {
     }
   }
 
-  const p = policies[active];
+  const p = policies[Math.min(active, policies.length - 1)];
+  if (!p) return null;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[300px_1fr] lg:gap-14">
       <div className="lg:sticky lg:top-28 lg:self-start">
         <p className="mb-3 hidden text-sm font-bold uppercase tracking-[0.08em] text-brand-deep lg:block">
-          Nos politiques
+          {labels.listTitle}
         </p>
         <div
           role="tablist"
-          aria-label="Politiques de l'établissement"
+          aria-label={labels.tabsLabel}
           aria-orientation="vertical"
           className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0 lg:pb-0"
         >
@@ -134,12 +135,12 @@ export function PolicyViewer({ policies }: { policies: Policy[] }) {
                   {s.heading}
                 </h3>
                 <div className="space-y-4 leading-relaxed text-ink-soft">
-                  {s.paras?.map((t) => (
+                  {s.paras.map((t) => (
                     <p key={t} className="text-[17px]">
                       {t}
                     </p>
                   ))}
-                  {s.items && (
+                  {s.items.length > 0 && (
                     <ul className="space-y-3">
                       {s.items.map((t) => (
                         <li key={t} className="flex gap-3 text-[17px]">

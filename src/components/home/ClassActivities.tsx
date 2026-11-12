@@ -4,30 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, X } from "lucide-react";
-
-type Tile = {
-  cls: string;
-  src: string;
-  alt: string;
-  label: string;
-  yt?: string;
-  videoTitle?: string;
-};
-
-const TILES: Tile[] = [
-  { cls: "t1", src: "/media/activites/act-1.jpg", alt: "Élèves pendant une expérience en classe", label: "Sciences" },
-  { cls: "t2", src: "/media/activites/v-OGEgn4PXJUQ.jpg", alt: "", label: "Projet design", yt: "OGEgn4PXJUQ", videoTitle: "From design to impact" },
-  { cls: "t3", src: "/media/activites/act-3.jpg", alt: "Deux élèves jouant aux échecs", label: "Échecs" },
-  { cls: "t4", src: "/media/activites/sport.jpg", alt: "Élèves pendant une activité sportive en équipe", label: "Sport" },
-  { cls: "t5", src: "/media/activites/v-FbQW6uC6Iv0.jpg", alt: "", label: "Tournoi de football", yt: "FbQW6uC6Iv0", videoTitle: "TakiAcademy Champions League" },
-  { cls: "t6", src: "/media/activites/clubs.jpg", alt: "Élèves et encadrant réunis lors d’un club", label: "Clubs" },
-  { cls: "t7", src: "/media/activites/v-sPvUT4VxuqY.jpg", alt: "", label: "Défis", yt: "sPvUT4VxuqY", videoTitle: "Ready to take on the challenge" },
-  { cls: "t8", src: "/media/activites/act-2.jpg", alt: "Élèves mesurant pendant un atelier pratique", label: "Ateliers" },
-];
+import { rich } from "@/components/Rich";
+import type { ClassActivitiesContent } from "@/lib/content/home-2";
 
 const DEPTH = [18, 30, 14, 10, 28, 16, 24, 12];
 
-export function ClassActivities() {
+export function ClassActivities({ content }: { content: ClassActivitiesContent }) {
+  const { tiles, labels } = content;
   const secRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -81,7 +64,8 @@ export function ClassActivities() {
     const px = (e.clientX - r.left) / r.width - 0.5;
     const py = (e.clientY - r.top) / r.height - 0.5;
     stage.querySelectorAll<HTMLElement>(".tile__par").forEach((p, i) => {
-      p.style.transform = `translate(${-px * DEPTH[i]}px,${-py * DEPTH[i]}px)`;
+      const depth = DEPTH[i % DEPTH.length];
+      p.style.transform = `translate(${-px * depth}px,${-py * depth}px)`;
     });
   };
   const onLeave = () => {
@@ -101,45 +85,45 @@ export function ClassActivities() {
     <section ref={secRef} className={`act ${inView ? "in" : ""}`} id="activites" aria-labelledby="actTitle">
       <div className="act__stage" ref={stageRef} onMouseMove={onMove} onMouseLeave={onLeave}>
         <div className="act__strip">
-          {TILES.map((t, i) => (
+          {tiles.map((t, i) => (
             <div
-              key={t.cls}
-              className={`tile ${t.yt ? "tile--v" : ""} ${t.cls}`}
+              key={i}
+              className={`tile ${t.videoId ? "tile--v" : ""} t${i + 1}`}
               style={{ transitionDelay: inView ? "0s" : `${0.08 * i + 0.1}s` }}
-              onMouseEnter={t.yt ? () => enter(t.yt!) : undefined}
-              onMouseLeave={t.yt ? leave : undefined}
+              onMouseEnter={t.videoId ? () => enter(t.videoId) : undefined}
+              onMouseLeave={t.videoId ? leave : undefined}
             >
               <div className="tile__par">
                 <div className="tile__float">
-                  {t.yt ? (
+                  {t.videoId ? (
                     <button
                       type="button"
                       className="tile__m"
-                      aria-label={`Lire la vidéo : ${t.videoTitle}`}
+                      aria-label={`${labels.playVideo} ${t.videoTitle}`}
                       onClick={() => {
                         leave();
-                        setVideo(t.yt!);
+                        setVideo(t.videoId);
                       }}
                     >
-                      <Image src={t.src} alt="" fill sizes="200px" />
-                      {preview === t.yt && (
+                      <Image src={t.image} alt="" fill sizes="200px" />
+                      {preview === t.videoId && (
                         <span className="tile__prev" style={{ opacity: 1 }}>
                           <iframe
-                            src={`https://www.youtube-nocookie.com/embed/${t.yt}?autoplay=1&mute=1&controls=0&loop=1&playlist=${t.yt}&playsinline=1&rel=0&modestbranding=1`}
+                            src={`https://www.youtube-nocookie.com/embed/${t.videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${t.videoId}&playsinline=1&rel=0&modestbranding=1`}
                             allow="autoplay; encrypted-media"
                             referrerPolicy="strict-origin-when-cross-origin"
-                            title="Aperçu vidéo"
+                            title={labels.previewTitle}
                             tabIndex={-1}
                           />
                         </span>
                       )}
-                      <span className="tile__badge">Vidéo</span>
+                      <span className="tile__badge">{labels.videoBadge}</span>
                       <span className="tile__play" aria-hidden />
                       <span className="tile__lbl">{t.label}</span>
                     </button>
                   ) : (
                     <figure className="tile__m" style={{ margin: 0 }}>
-                      <Image src={t.src} alt={t.alt} fill sizes="240px" />
+                      <Image src={t.image} alt={t.alt} fill sizes="240px" />
                       <span className="tile__lbl">{t.label}</span>
                     </figure>
                   )}
@@ -150,13 +134,13 @@ export function ClassActivities() {
         </div>
 
         <div className="act__center">
-          <p className="act__eyebrow">Les activités de classe</p>
+          <p className="act__eyebrow">{content.eyebrow}</p>
           <h2 className="act__title" id="actTitle">
-            Chaque jour, une<br />nouvelle <em>expérience</em>.
+            {rich(content.title)}
           </h2>
-          <p className="act__text">Sciences, sport, clubs, projets, défis : nos élèves apprennent en faisant.</p>
-          <Link href="/scholar-life" className="act__cta">
-            Découvrir la vie scolaire
+          <p className="act__text">{content.text}</p>
+          <Link href={content.cta.href} className="act__cta">
+            {content.cta.label}
             <i aria-hidden>
               <ArrowRight size={16} strokeWidth={2.6} />
             </i>
@@ -169,19 +153,19 @@ export function ClassActivities() {
           className="act-modal"
           role="dialog"
           aria-modal="true"
-          aria-label="Vidéo des activités de classe"
+          aria-label={labels.modalLabel}
           onClick={(e) => e.target === e.currentTarget && setVideo(null)}
         >
           <div className="act-modal__box">
             <button className="act-modal__close" onClick={() => setVideo(null)}>
-              Fermer <X size={14} aria-hidden />
+              {labels.close} <X size={14} aria-hidden />
             </button>
             <iframe
               src={`https://www.youtube-nocookie.com/embed/${video}?autoplay=1&rel=0&modestbranding=1&playsinline=1`}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
-              title="Vidéo : activités de classe"
+              title={labels.modalTitle}
             />
             <a
               className="act-modal__yt"
@@ -189,7 +173,7 @@ export function ClassActivities() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              La vidéo ne se lance pas ? Regarder sur YouTube →
+              {labels.youtubeFallback}
             </a>
           </div>
         </div>

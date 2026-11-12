@@ -104,6 +104,23 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Tailwind v4 no longer sets a pointer cursor on buttons: restore it for everything clickable. */
+a[href],
+button,
+[role="button"],
+[role="tab"],
+summary,
+select,
+input[type="radio"],
+input[type="checkbox"],
+input[type="submit"] {
+  cursor: pointer;
+}
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
 ::selection {
   background: var(--color-brand);
   color: white;

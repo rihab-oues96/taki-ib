@@ -3,22 +3,25 @@
 import { useMemo, useState } from "react";
 import { Reveal } from "@/components/Reveal";
 import { Eyebrow } from "@/components/ui";
-import { VIDEOS, VIDEO_CATS, type VideoCat } from "@/lib/school-videos";
+import { rich } from "@/components/Rich";
+import type { SchoolVideo, VideoCat } from "@/lib/content/videos";
+import type { VieVideosContent } from "@/lib/content/vie-scolaire";
 import { VideoThumb } from "./VideoPlayer";
 
 const STEP = 15;
 
 /** Filterable library of every video, with a "voir plus" pager. */
-export function VieVideos() {
+export function VieVideos({ content, videos: VIDEOS }: { content: VieVideosContent; videos: SchoolVideo[] }) {
+  const VIDEO_CATS = content.categories;
   const [filter, setFilter] = useState<VideoCat | "all">("all");
   const [shown, setShown] = useState(STEP);
 
   const counts = useMemo(
     () => Object.fromEntries(VIDEO_CATS.map((c) => [c.key, VIDEOS.filter((v) => v.cat === c.key).length])) as Record<VideoCat, number>,
-    [],
+    [VIDEO_CATS, VIDEOS],
   );
   const list = filter === "all" ? VIDEOS : VIDEOS.filter((v) => v.cat === filter);
-  const label = (k: VideoCat) => VIDEO_CATS.find((c) => c.key === k)!.label;
+  const label = (k: VideoCat) => VIDEO_CATS.find((c) => c.key === k)?.label ?? "";
 
   const pick = (f: VideoCat | "all") => {
     setFilter(f);
@@ -30,18 +33,18 @@ export function VieVideos() {
       <div className="mx-auto w-[min(1200px,100%)]">
         <Reveal className="grid items-end gap-6 md:grid-cols-2 md:gap-x-20">
           <div>
-            <Eyebrow>Nos vidéos</Eyebrow>
+            <Eyebrow>{content.eyebrow}</Eyebrow>
             <h2 id="vwTitle" className="text-[clamp(30px,3.4vw,48px)] font-semibold leading-[1.08] tracking-[-0.035em] text-navy">
-              Toute la vie de l’école, <em className="not-italic text-brand">en vidéo</em>.
+              {rich(content.title, "not-italic text-brand")}
             </h2>
           </div>
           <p className="text-[17px] leading-[1.6] text-[#5d6f7c]">
-            Activités, sorties, journées portes ouvertes, témoignages de parents et d’élèves&nbsp;: retrouvez ici toutes nos vidéos.
+            {content.lead}
           </p>
         </Reveal>
 
-        <div role="group" aria-label="Filtrer les vidéos" className="mt-9 flex flex-wrap gap-2">
-          {[{ key: "all" as const, label: "Tout", n: VIDEOS.length }, ...VIDEO_CATS.map((c) => ({ key: c.key, label: c.label, n: counts[c.key] }))].map((f) => {
+        <div role="group" aria-label={content.filterAriaLabel} className="mt-9 flex flex-wrap gap-2">
+          {[{ key: "all" as const, label: content.allLabel, n: VIDEOS.length }, ...VIDEO_CATS.map((c) => ({ key: c.key, label: c.label, n: counts[c.key] }))].map((f) => {
             const on = filter === f.key;
             return (
               <button
@@ -80,7 +83,7 @@ export function VieVideos() {
               onClick={() => setShown((s) => s + STEP)}
               className="inline-flex h-12 items-center justify-center rounded-full border-[1.5px] border-[#cfdde6] bg-transparent px-6 text-sm font-bold text-navy transition hover:border-brand hover:bg-brand hover:text-white focus-visible:outline-3 focus-visible:outline-offset-[3px] focus-visible:outline-sun max-[640px]:w-full"
             >
-              Voir plus de vidéos
+              {content.moreLabel}
             </button>
           </div>
         )}

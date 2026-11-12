@@ -4,46 +4,34 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { SITE } from "@/lib/site";
+import { useSite } from "@/components/SiteProvider";
+import type { HeroContent } from "@/lib/content/home";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-
-const PROGS = {
-  pei: {
-    code: "PEI",
-    accent: "#e54c22",
-    logo: "/brand/ib-pei.png",
-    width: 1200,
-    height: 263,
-    alt: "Programme d'éducation intermédiaire de l'IB",
-    title: "Programme d'éducation intermédiaire",
-    text: "Le Programme d'éducation intermédiaire propose un curriculum riche et varié, avec des méthodes d'enseignement dynamiques basées sur la recherche. Il encourage la pensée critique et l'application des connaissances dans le monde réel.",
-    href: "/middle-education-program",
-  },
-  dp: {
-    code: "DP",
-    accent: "#1c9bd6",
-    logo: "/brand/ib-dp.png",
-    width: 512,
-    height: 156,
-    alt: "Programme du diplôme de l'IB",
-    title: "Programme du diplôme de l'IB",
-    text: "Le Programme du diplôme de l'IB offre une formation académique rigoureuse qui prépare les élèves à participer activement à une société mondiale en constante évolution. Il repose sur quatre piliers fondamentaux qui garantissent un développement complet de chaque élève.",
-    href: "/diploma-program",
-  },
-} as const;
-
-type Key = keyof typeof PROGS;
 
 const BTN =
   "inline-flex h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full border-[1.5px] px-6 text-sm font-bold leading-none transition-colors duration-200 max-[640px]:w-full";
 
-export function Hero() {
+/** Splits a title line into words; words inside `*…*` are flagged as highlighted. */
+function titleWords(line: string) {
+  return line
+    .split(/(\*[^*]+\*)/g)
+    .flatMap((part) => {
+      const on = part.length > 2 && part.startsWith("*") && part.endsWith("*");
+      return (on ? part.slice(1, -1) : part)
+        .split(" ")
+        .filter(Boolean)
+        .map((word) => ({ word, on }));
+    });
+}
+
+export function Hero({ content: c }: { content: HeroContent }) {
+  const site = useSite();
   const reduce = useReducedMotion();
   const [playing, setPlaying] = useState(false);
   const [paused, setPaused] = useState(false);
   const [film, setFilm] = useState(false);
-  const [prog, setProg] = useState<Key | null>(null);
+  const [prog, setProg] = useState<number | null>(null);
   const bg = useRef<HTMLIFrameElement>(null);
   const dock = useRef<HTMLElement>(null);
   const pop = useRef<HTMLDivElement>(null);
@@ -100,10 +88,10 @@ export function Hero() {
   useLayoutEffect(() => {
     const p = pop.current;
     const d = dock.current;
-    const c = chipEl.current;
-    if (!prog || !p || !d || !c) return;
+    const chip = chipEl.current;
+    if (prog === null || !p || !d || !chip) return;
     const dr = d.getBoundingClientRect();
-    const cr = c.getBoundingClientRect();
+    const cr = chip.getBoundingClientRect();
     const center = cr.left + cr.width / 2;
     const w = p.offsetWidth;
     const popRight = dr.right - d.clientLeft;
@@ -124,8 +112,9 @@ export function Hero() {
     setPaused((p) => !p);
   };
 
-  const words1 = "L’excellence éducative".split(" ");
-  const words2 = "au cœur de notre programme IB".split(" ");
+  const words1 = titleWords(c.titleLine1);
+  const words2 = titleWords(c.titleLine2);
+  const current = prog === null ? undefined : c.programmes[prog];
 
   const fade = (delay: number) => ({
     initial: reduce ? (false as const) : { opacity: 0, y: 14 },
@@ -135,16 +124,19 @@ export function Hero() {
 
   return (
     <section
-      aria-label="Accueil"
+      aria-label={c.sectionLabel}
       className="relative isolate flex min-h-svh flex-col overflow-hidden bg-navy-900 text-paper"
     >
       {/* Background video */}
-      <div className="absolute inset-0 z-0 overflow-hidden bg-[#0b2230] bg-[url('https://i.ytimg.com/vi/JKW2o7yF1es/maxresdefault.jpg')] bg-cover bg-center bg-no-repeat">
+      <div
+        className="absolute inset-0 z-0 overflow-hidden bg-[#0b2230] bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url('https://i.ytimg.com/vi/${site.heroVideoId}/maxresdefault.jpg')` }}
+      >
         {!reduce && (
           <iframe
             ref={bg}
-            title="Vidéo de présentation TakiAcademy International School"
-            src={`https://www.youtube-nocookie.com/embed/${SITE.heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${SITE.heroVideoId}&start=21&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
+            title={c.video.backgroundTitle}
+            src={`https://www.youtube-nocookie.com/embed/${site.heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${site.heroVideoId}&start=${c.video.backgroundStart ?? 0}&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
             allow="autoplay; encrypted-media; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
             tabIndex={-1}
@@ -161,16 +153,16 @@ export function Hero() {
       <div className="relative z-[2] flex h-10 items-center justify-center gap-2.5 bg-navy-900/45 px-4 text-center text-sm text-paper backdrop-blur-[5px] max-[640px]:h-auto max-[640px]:min-h-10 max-[640px]:px-3 max-[640px]:py-1.5 max-[640px]:text-xs">
         <span className="size-1.5 shrink-0 rounded-full bg-sun" aria-hidden />
         <span>
-          Programme d&apos;éducation intermédiaire de l&apos;IB{" "}
-          <span className="max-[640px]:hidden">· Programme du Diplôme </span>
+          {c.announcement.text}{" "}
+          <span className="max-[640px]:hidden">{c.announcement.textDesktop} </span>
         </span>
         <a
-          href="https://www.ibo.org/fr/"
+          href={c.announcement.linkHref}
           target="_blank"
           rel="noopener"
           className="whitespace-nowrap border-b border-paper/35 opacity-75 hover:opacity-100"
         >
-          Vérifier sur ibo.org →
+          {c.announcement.linkLabel}
         </a>
       </div>
 
@@ -183,24 +175,21 @@ export function Hero() {
           {...fade(0.1)}
           className="mb-[18px] inline-flex items-center gap-2.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-brand-light"
         >
-          TakiAcademy International School - IB
+          {c.eyebrow}
         </motion.p>
         <h1 className="text-[48px] font-semibold leading-[1.08] tracking-[-0.025em] max-[640px]:text-[34px]">
           <span className="block">
             {words1.map((w, i) => (
-              <Word key={w + i} i={i} reduce={!!reduce}>
-                {w}
+              <Word key={w.word + i} i={i} reduce={!!reduce}>
+                {w.word}
               </Word>
             ))}
           </span>
           <span className="block text-brand-light">
             {words2.map((w, i) => (
-              <span
-                key={w + i}
-                className={i >= words2.length - 2 ? "text-sun" : undefined}
-              >
+              <span key={w.word + i} className={w.on ? "text-sun" : undefined}>
                 <Word i={i + words1.length} reduce={!!reduce}>
-                  {w}
+                  {w.word}
                 </Word>
               </span>
             ))}
@@ -210,8 +199,7 @@ export function Hero() {
           {...fade(1.1)}
           className="mt-[22px] max-w-[560px] text-[17px] leading-[1.55] text-paper/[.78] max-[640px]:text-[15.5px]"
         >
-          Les programmes de l&apos;IB, un cadre multiculturel et un accompagnement personnalisé,
-          à Sahloul&nbsp;4, Sousse.
+          {c.lead}
         </motion.p>
         <motion.div
           {...fade(1.3)}
@@ -228,13 +216,13 @@ export function Hero() {
                 aria-hidden
               />
             </span>
-            Regarder maintenant
+            {c.watchLabel}
           </button>
           <a
-            href={SITE.preRegistration}
+            href={c.cta.href}
             className={`${BTN} border-paper bg-paper text-navy hover:border-brand hover:bg-brand hover:text-white`}
           >
-            Pré-inscription
+            {c.cta.label}
           </a>
         </motion.div>
       </div>
@@ -243,7 +231,7 @@ export function Hero() {
       <motion.aside
         ref={dock}
         {...fade(1.7)}
-        aria-label="Nos programmes IB"
+        aria-label={c.dock.title}
         onClick={(e) => e.stopPropagation()}
         className="absolute bottom-8 right-8 z-[4] rounded-[20px] border border-paper/[.14] bg-navy-900/[.42] p-3.5 shadow-[0_24px_60px_-24px_rgba(0,0,0,.55)] backdrop-blur-[14px] backdrop-saturate-[1.4] max-[1180px]:relative max-[1180px]:bottom-auto max-[1180px]:right-auto max-[1180px]:z-[2] max-[1180px]:mx-4 max-[1180px]:mb-7 max-[1180px]:max-w-[calc(100%-32px)] max-[1180px]:self-center max-[640px]:rounded-[18px] max-[640px]:p-3"
       >
@@ -252,14 +240,14 @@ export function Hero() {
             <span className="absolute -inset-1 animate-pulse-ring rounded-full border-[1.5px] border-sun" />
           </span>
           <span>
-            Nos programmes IB{" "}
+            {c.dock.title}{" "}
             <span className="font-medium normal-case tracking-[0.02em] text-paper/55 max-[640px]:hidden">
-              · cliquez pour découvrir
+              {c.dock.hint}
             </span>
           </span>
         </p>
         <div className="flex gap-2.5 max-[640px]:gap-2">
-          {(Object.keys(PROGS) as Key[]).map((k) => (
+          {c.programmes.map((p, k) => (
             <button
               key={k}
               type="button"
@@ -276,17 +264,17 @@ export function Hero() {
               }`}
             >
               <Image
-                src={PROGS[k].logo}
-                alt={PROGS[k].alt}
-                width={PROGS[k].width}
-                height={PROGS[k].height}
+                src={p.logo}
+                alt={p.alt}
+                width={p.logoWidth ?? 512}
+                height={p.logoHeight ?? 156}
                 className="block h-[35px] w-auto max-[640px]:h-[27px] max-[640px]:max-w-full max-[640px]:object-contain"
               />
             </button>
           ))}
         </div>
 
-        {prog && (
+        {current && (
           <div
             ref={pop}
             key={prog}
@@ -299,7 +287,7 @@ export function Hero() {
             <button
               type="button"
               onClick={() => setProg(null)}
-              aria-label="Fermer"
+              aria-label={c.dock.closeLabel}
               className="absolute right-3 top-3 size-8 rounded-full bg-[#eef3f6] text-xl leading-none text-navy transition-colors duration-200 hover:bg-brand hover:text-white"
             >
               ×
@@ -307,20 +295,20 @@ export function Hero() {
             <div className="mb-2.5 flex items-center gap-2">
               <span
                 className="inline-flex h-6 items-center rounded-full px-2.5 text-xs font-bold tracking-[0.06em] text-white"
-                style={{ background: PROGS[prog].accent }}
+                style={{ background: current.accent }}
               >
-                {PROGS[prog].code}
+                {current.code}
               </span>
             </div>
             <h2 className="mb-2 mr-10 text-[19px] font-bold leading-[1.25] tracking-[-0.01em]">
-              {PROGS[prog].title}
+              {current.title}
             </h2>
-            <p className="text-[14.5px] leading-[1.6] text-ink-soft">{PROGS[prog].text}</p>
+            <p className="text-[14.5px] leading-[1.6] text-ink-soft">{current.text}</p>
             <Link
-              href={PROGS[prog].href}
+              href={current.href}
               className="group mt-3.5 inline-flex items-center gap-1.5 text-sm font-bold text-brand hover:text-navy"
             >
-              En savoir plus
+              {c.dock.moreLabel}
               <span
                 aria-hidden
                 className="transition-transform duration-[250ms] ease-out-expo group-hover:translate-x-1"
@@ -338,7 +326,7 @@ export function Hero() {
           type="button"
           onClick={toggle}
           {...fade(1.5)}
-          aria-label={paused ? "Lire la vidéo" : "Mettre la vidéo en pause"}
+          aria-label={paused ? c.video.playLabel : c.video.pauseLabel}
           className="absolute bottom-8 left-6 z-[3] grid size-10 place-items-center rounded-full border border-paper/35 bg-navy-900/35 hover:bg-navy-900/60 max-[640px]:bottom-auto max-[640px]:left-auto max-[640px]:right-4 max-[640px]:top-[136px]"
         >
           <svg width="12" height="12" viewBox="0 0 12 12" fill="#fafafa" aria-hidden>
@@ -359,7 +347,7 @@ export function Hero() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Vidéo de présentation"
+          aria-label={c.video.filmTitle}
           onClick={(e) => e.target === e.currentTarget && setFilm(false)}
           className="fixed inset-0 z-50 grid place-items-center bg-[rgba(3,15,21,.86)] p-4"
         >
@@ -370,23 +358,23 @@ export function Hero() {
               className="absolute -top-11 right-0 text-sm opacity-80 hover:opacity-100"
               autoFocus
             >
-              Fermer ✕
+              {c.video.filmClose}
             </button>
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${SITE.filmVideoId}?autoplay=1&rel=0&modestbranding=1`}
-              title="Vidéo de présentation"
+              src={`https://www.youtube-nocookie.com/embed/${site.filmVideoId}?autoplay=1&rel=0&modestbranding=1`}
+              title={c.video.filmTitle}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
               className="absolute inset-0 size-full border-0"
             />
             <a
-              href={`https://www.youtube.com/watch?v=${SITE.filmVideoId}`}
+              href={`https://www.youtube.com/watch?v=${site.filmVideoId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="absolute inset-x-0 -bottom-10 text-center text-[13.5px] text-paper/75 underline underline-offset-[3px] hover:text-brand"
             >
-              La vidéo ne se lance pas&nbsp;? Regarder sur YouTube →
+              {c.video.filmFallback}
             </a>
           </div>
         </div>

@@ -1,40 +1,29 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const QUALITIES: [string, string][] = [
-  ["Chercheurs", "Ils cultivent leur curiosité, apprennent à mener des recherches et gardent l'envie d'apprendre toute leur vie."],
-  ["Informés et instruits", "Ils explorent des idées et des enjeux d'importance locale et mondiale, dans de nombreuses disciplines."],
-  ["Sensés", "Ils analysent des problèmes complexes avec un esprit critique et créatif, et agissent de façon responsable."],
-  ["Communicatifs", "Ils s'expriment avec assurance dans plusieurs langues et écoutent attentivement les autres."],
-  ["Intègres", "Ils agissent avec honnêteté, avec un sens profond de l'équité et du respect de chacun."],
-  ["Ouverts d'esprit", "Ils apprécient leur propre culture et restent ouverts aux valeurs et aux points de vue des autres."],
-  ["Altruistes", "Ils font preuve d'empathie et s'engagent pour aider les autres et protéger leur environnement."],
-  ["Audacieux", "Ils abordent l'incertitude avec courage, osent essayer de nouvelles idées et défendent leurs convictions."],
-  ["Équilibrés", "Ils prennent soin de l'équilibre entre leur esprit, leur corps et leur bien-être."],
-  ["Réfléchis", "Ils prennent du recul sur leurs apprentissages pour comprendre leurs forces et progresser."],
-];
+import type { Quality } from "@/lib/content/programmes";
 
 const DUR = 4500;
 
-export function LearnerProfileExplorer() {
+export function LearnerProfileExplorer({ label, qualities }: { label: string; qualities: Quality[] }) {
   const [cur, setCur] = useState(0);
   const [hold, setHold] = useState(false);
 
   useEffect(() => {
-    if (hold || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const t = setTimeout(() => setCur((c) => (c + 1) % QUALITIES.length), DUR);
+    if (hold || qualities.length === 0 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setTimeout(() => setCur((c) => (c + 1) % qualities.length), DUR);
     return () => clearTimeout(t);
-  }, [cur, hold]);
+  }, [cur, hold, qualities.length]);
 
-  const [title, text] = QUALITIES[cur];
+  const current = qualities[cur] ?? qualities[0];
+  if (!current) return null;
 
   return (
     <div onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)}>
-      <div role="group" aria-label="Les dix qualités" className="flex flex-wrap gap-2">
-        {QUALITIES.map(([name], i) => (
+      <div role="group" aria-label={label} className="flex flex-wrap gap-2">
+        {qualities.map(({ name }, i) => (
           <button
-            key={name}
+            key={i}
             type="button"
             aria-pressed={i === cur}
             onClick={() => { setHold(true); setCur(i); }}
@@ -51,9 +40,9 @@ export function LearnerProfileExplorer() {
         className="relative mt-[18px] min-h-[210px] overflow-hidden rounded-3xl bg-[radial-gradient(120%_140%_at_85%_0%,#14587a_0%,#0b3346_60%,#082a3a_100%)] px-[34px] pb-[34px] pt-[30px] text-white max-sm:px-6"
       >
         <div key={cur} className="animate-fade-up">
-          <span className="text-[13px] font-bold tracking-[0.08em] text-sun">{String(cur + 1).padStart(2, "0")} / 10</span>
-          <h3 className="mt-2.5 text-[clamp(26px,2.6vw,34px)] font-bold leading-[1.1] tracking-[-0.025em]">{title}</h3>
-          <p className="mt-3 max-w-[540px] text-[16.5px] leading-[1.6] text-white/80">{text}</p>
+          <span className="text-[13px] font-bold tracking-[0.08em] text-sun">{String(cur + 1).padStart(2, "0")} / {qualities.length}</span>
+          <h3 className="mt-2.5 text-[clamp(26px,2.6vw,34px)] font-bold leading-[1.1] tracking-[-0.025em]">{current.name}</h3>
+          <p className="mt-3 max-w-[540px] text-[16.5px] leading-[1.6] text-white/80">{current.text}</p>
         </div>
         <span
           key={`bar-${cur}-${hold}`}

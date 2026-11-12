@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { Play, X } from "lucide-react";
-import type { SchoolVideo } from "@/lib/school-videos";
+import type { SchoolVideo } from "@/lib/content/videos";
 
 type Open = (v: Pick<SchoolVideo, "id" | "kind" | "title">, trigger: HTMLElement | null) => void;
 const Ctx = createContext<Open | null>(null);

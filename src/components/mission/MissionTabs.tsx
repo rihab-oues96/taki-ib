@@ -3,46 +3,12 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
-
-type Mission = {
-  id: string;
-  tab: string;
-  tabLong?: string;
-  kicker: string;
-  title: string;
-  text: string;
-  image: string;
-  /** Optional logo shown above the text. */
-  logo?: { src: string; alt: string; width: number; height: number };
-  link?: { href: string; label: string };
-};
-
-const MISSIONS: Mission[] = [
-  {
-    id: "ib",
-    tabLong: "Mission de ",
-    tab: "l’IB",
-    kicker: "Baccalauréat International",
-    title: "Bâtir un monde meilleur et plus paisible",
-    text: "Le Baccalauréat International a pour but de développer chez les jeunes la curiosité intellectuelle, les connaissances et la sensibilité nécessaires pour contribuer à bâtir un monde meilleur et plus paisible, dans un esprit d’entente mutuelle et de respect interculturel.",
-    image: "/media/about/courtyard.jpg",
-    logo: { src: "/brand/ib-logo.png", alt: "International Baccalaureate", width: 467, height: 145 },
-    link: { href: "https://www.ibo.org/fr/", label: "En savoir plus sur ibo.org" },
-  },
-  {
-    id: "ecole",
-    tabLong: "Mission de ",
-    tab: "l’établissement",
-    kicker: "TakiAcademy International School",
-    title: "Préparer nos élèves aux défis du monde",
-    text: "Fournir une éducation de qualité conforme au système du Baccalauréat International (IB), favorisant ainsi le développement académique, inspirer et préparer nos élèves à relever les défis globaux avec intégrité et dévouement.",
-    image: "/media/about/building.jpg",
-  },
-];
+import type { MissionsContent } from "@/lib/content/mission";
 
 /** "Nos missions" tab switcher: sliding white pill, arrow-key navigation (Figma Mission page). */
-export function MissionTabs() {
-  const [current, setCurrent] = useState(1);
+export function MissionTabs({ content }: { content: MissionsContent }) {
+  const MISSIONS = content.items;
+  const [current, setCurrent] = useState(() => Math.min(Math.max((content.defaultTab ?? 1) - 1, 0), Math.max(MISSIONS.length - 1, 0)));
   const barRef = useRef<HTMLDivElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const [pill, setPill] = useState({ x: 0, w: 0 });
@@ -73,7 +39,7 @@ export function MissionTabs() {
       <div
         ref={barRef}
         role="tablist"
-        aria-label="Nos missions"
+        aria-label={content.tabsLabel}
         className="relative mx-auto mt-9 flex w-max max-w-full overflow-x-auto rounded-full bg-[#eef6fb] p-2 shadow-[0_24px_48px_-36px_rgba(11,51,70,.35)] [scrollbar-width:none] max-[900px]:w-full max-[600px]:w-max max-[600px]:overflow-visible [&::-webkit-scrollbar]:hidden"
       >
         <span
@@ -128,12 +94,12 @@ export function MissionTabs() {
               />
             </figure>
             <div>
-              {m.logo && (
+              {m.logo.src && (
                 <Image
                   src={m.logo.src}
                   alt={m.logo.alt}
-                  width={m.logo.width}
-                  height={m.logo.height}
+                  width={m.logo.width ?? 200}
+                  height={m.logo.height ?? 62}
                   className="-ml-3 mb-1 h-auto w-[200px]"
                 />
               )}
@@ -142,7 +108,7 @@ export function MissionTabs() {
                 {m.title}
               </h3>
               <p className="mt-[18px] text-[17px] leading-[1.7] text-[#5d6f7c]">{m.text}</p>
-              {m.link && (
+              {m.link.href && (
                 <a
                   href={m.link.href}
                   target="_blank"

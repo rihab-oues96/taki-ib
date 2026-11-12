@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import type { Post } from "@/lib/site";
+import type { Post } from "@/lib/content/actualites";
 
 export function formatDate(iso: string) {
   return new Date(iso + "T12:00:00Z").toLocaleDateString("fr-FR", {
@@ -12,7 +12,7 @@ export function formatDate(iso: string) {
   });
 }
 
-export function PostCard({ post, large = false }: { post: Post; large?: boolean }) {
+export function PostCard({ post, readLabel, large = false }: { post: Post; readLabel: string; large?: boolean }) {
   return (
     <Link
       href={`/actuality/${post.slug}`}
@@ -37,7 +37,7 @@ export function PostCard({ post, large = false }: { post: Post; large?: boolean 
         <h3 className={`${large ? "mt-4" : "mt-3"} font-semibold tracking-[-0.03em] leading-tight ${large ? "text-[clamp(28px,3vw,38px)]" : "text-[20px]"}`}>{post.title}</h3>
         <p className={`mt-2 leading-relaxed text-ink-soft ${large ? "" : "line-clamp-3 text-sm"}`}>{post.excerpt}</p>
         <span className={`${large ? "mt-6" : "mt-4"} inline-flex items-center gap-1.5 text-sm font-bold text-brand-deep`}>
-          Lire l&apos;article
+          {readLabel}
           <ArrowUpRight size={18} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden />
         </span>
       </div>

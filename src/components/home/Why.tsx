@@ -3,18 +3,14 @@
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { Reveal } from "@/components/Reveal";
+import { rich } from "@/components/Rich";
 import { ButtonLink } from "@/components/ui";
-
-const PANELS = [
-  { img: "classes", side: "Baccalauréat International", title: "Baccalauréat International (IB)", text: "Un diplôme reconnu par les universités du monde entier." },
-  { img: "courtyard", side: "Ouverture aux autres", title: "Ouverture aux autres", text: "Des élèves curieux, à l’écoute et ouverts sur le monde." },
-  { img: "sport", side: "Apprentissage intégral", title: "Un apprentissage intégral", text: "L’esprit, le corps et la créativité grandissent ensemble." },
-  { img: "multimedia", side: "Des parents informés", title: "Des parents informés", text: "Suivez les présences, les notes, les bulletins, les devoirs et les messages via la plateforme Web School." },
-];
+import type { WhyContent } from "@/lib/content/home";
 
 const DUR = 5000;
 
-export function Why() {
+export function Why({ content: c }: { content: WhyContent }) {
+  const PANELS = c.panels;
   const [cur, setCur] = useState(0);
   const [hold, setHold] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -35,7 +31,12 @@ export function Why() {
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setTimeout(() => setCur((c) => (c + 1) % PANELS.length), DUR);
     return () => clearTimeout(t);
-  }, [cur, auto]);
+  }, [cur, auto, PANELS.length]);
+
+  // "Une *éducation internationale*, …": the last highlighted word carries the small drawing.
+  const m = c.title.match(/^([^*]*)\*([^*]+)\*([^*]*)$/);
+  const cut = m ? m[2].lastIndexOf(" ") + 1 : 0;
+  const title = m ? { before: m[1], lead: m[2].slice(0, cut), last: m[2].slice(cut), after: m[3] } : null;
 
   const openAt = (i: number) => {
     setHold(true);
@@ -50,25 +51,33 @@ export function Why() {
           <Reveal>
             <p className="mb-3 inline-flex items-center gap-2.5 text-[13.5px] font-medium uppercase tracking-[0.06em] text-white/80">
               <span className="h-1 w-[26px] rounded bg-sun" aria-hidden />
-              Pourquoi nous choisir
+              {c.eyebrow}
             </p>
             <h2 id="whyTitle" className="text-[clamp(30px,3.2vw,42px)] font-bold leading-[1.1] tracking-[-0.025em]">
-              Une{" "}
-              <em className="not-italic text-brand-light">
-                éducation{" "}
-                <span className="relative whitespace-nowrap">
-                  internationale
-                  <Image src="/media/why/3lines.svg" alt="" aria-hidden width={39} height={38} className="pointer-events-none absolute -right-[30px] -top-5 hidden w-[30px] -scale-x-100 brightness-[1.7] min-[701px]:block" />
-                </span>
-              </em>
-              , au cœur de Sousse.
+              {title ? (
+                <>
+                  {title.before}
+                  <em className="not-italic text-brand-light">
+                    {title.lead}
+                    <span className="relative whitespace-nowrap">
+                      {title.last}
+                      {c.decoration && (
+                        <Image src={c.decoration} alt="" aria-hidden width={39} height={38} className="pointer-events-none absolute -right-[30px] -top-5 hidden w-[30px] -scale-x-100 brightness-[1.7] min-[701px]:block" />
+                      )}
+                    </span>
+                  </em>
+                  {title.after}
+                </>
+              ) : (
+                rich(c.title, "not-italic text-brand-light")
+              )}
             </h2>
           </Reveal>
           <Reveal delay={0.08}>
             <p className="text-[15.5px] leading-[1.6] text-white/80">
-              Le cursus conduit nos élèves à un baccalauréat reconnu mondialement et leur offrira ainsi des opportunités d’études universitaires à l’international.
+              {c.text}
             </p>
-            <ButtonLink href="/mission" variant="solid" className="mt-6">Notre Mission</ButtonLink>
+            <ButtonLink href={c.cta.href} variant="solid" className="mt-6">{c.cta.label}</ButtonLink>
           </Reveal>
         </div>
 
@@ -82,7 +91,7 @@ export function Why() {
               const num = String(i + 1).padStart(2, "0");
               return (
                 <article
-                  key={p.img}
+                  key={i}
                   ref={(el) => {
                     panelRefs.current[i] = el;
                   }}
@@ -107,7 +116,7 @@ export function Why() {
                   } min-[701px]:flex-1 min-[701px]:basis-0`}
                 >
                   <Image
-                    src={`/media/about/${p.img}.jpg`}
+                    src={p.image}
                     alt=""
                     fill
                     sizes="(min-width:701px) 700px, 100vw"

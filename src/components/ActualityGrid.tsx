@@ -6,28 +6,12 @@ import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { VideoThumb } from "@/components/vie/VideoPlayer";
-import type { SchoolVideo } from "@/lib/school-videos";
+import { rich } from "@/components/Rich";
+import type { NewsCat, NewsGridContent, NewsItem } from "@/lib/content/actualites";
+import type { SchoolVideo } from "@/lib/content/videos";
 
-export type NewsCat = "articles" | "events" | "ecole";
-
-export type NewsItem = {
-  cat: NewsCat;
-  title: string;
-  excerpt: string;
-  image: string;
-  /** Article: internal link. Video: YouTube id + kind. */
-  href?: string;
-  video?: { id: string; kind: "short" | "long" };
-};
-
-const FILTERS: { key: NewsCat | "all"; label: string }[] = [
-  { key: "all", label: "Tout" },
-  { key: "articles", label: "Articles" },
-  { key: "events", label: "Événements" },
-  { key: "ecole", label: "Vie de l’école" },
-];
-
-const TAG: Record<NewsCat, string> = { articles: "Articles", events: "Événements", ecole: "Vie de l’école" };
+/** Copy shared by every card: category names and link labels. */
+export type NewsCardLabels = Pick<NewsGridContent, "categories" | "articleLinkLabel" | "videoLinkLabel">;
 
 function LinkLabel({ children }: { children: string }) {
   return (
@@ -38,20 +22,21 @@ function LinkLabel({ children }: { children: string }) {
   );
 }
 
-export function NewsCard({ item }: { item: NewsItem }) {
+export function NewsCard({ item, labels }: { item: NewsItem; labels: NewsCardLabels }) {
+  const isVideo = item.video.id !== "";
   const body = (
     <div className="flex flex-1 flex-col items-start px-[22px] pb-[22px] pt-5">
-      <span className="rounded-full bg-[#eef6fb] px-[11px] py-1 text-[12.5px] font-bold text-brand">{TAG[item.cat]}</span>
+      <span className="rounded-full bg-[#eef6fb] px-[11px] py-1 text-[12.5px] font-bold text-brand">{labels.categories.find((c) => c.key === item.cat)?.label}</span>
       <h3 className="mt-3 text-[18.5px] font-bold leading-[1.3] tracking-[-0.015em]">{item.title}</h3>
       <p className="mt-2 flex-1 text-[14.5px] leading-[1.55] text-[#5d6f7c]">{item.excerpt}</p>
-      <LinkLabel>{item.video ? "Voir la vidéo" : "Lire l’article"}</LinkLabel>
+      <LinkLabel>{isVideo ? labels.videoLinkLabel : labels.articleLinkLabel}</LinkLabel>
     </div>
   );
   const shell =
     "group/c flex h-full flex-col overflow-hidden rounded-3xl bg-white text-left text-navy shadow-[0_24px_50px_-42px_rgba(11,51,70,.55)] transition duration-500 ease-out-expo hover:-translate-y-1.5 hover:shadow-[0_34px_60px_-40px_rgba(11,51,70,.6)]";
 
-  if (item.video) {
-    const v: SchoolVideo = { id: item.video.id, kind: item.video.kind, cat: "ecole", title: item.title, thumb: item.image };
+  if (isVideo) {
+    const v: SchoolVideo = { id: item.video.id, kind: item.video.kind === "long" ? "long" : "short", cat: "ecole", title: item.title, thumb: item.image };
     return (
       <article className={shell}>
         <VideoThumb video={v} sizes="(min-width:1024px) 400px, (min-width:640px) 50vw, 100vw" className="aspect-[16/10] w-full" />
@@ -60,7 +45,7 @@ export function NewsCard({ item }: { item: NewsItem }) {
     );
   }
   return (
-    <Link href={item.href!} className={`${shell} focus-visible:outline-3 focus-visible:outline-offset-[3px] focus-visible:outline-sun`}>
+    <Link href={item.href || "/actuality"} className={`${shell} focus-visible:outline-3 focus-visible:outline-offset-[3px] focus-visible:outline-sun`}>
       <div className="relative aspect-[16/10] overflow-hidden bg-[#dbe8f0]">
         <Image
           src={item.image}
@@ -76,7 +61,8 @@ export function NewsCard({ item }: { item: NewsItem }) {
 }
 
 /** "Toutes les actualités": filter bar + card grid. */
-export function ActualityGrid({ items }: { items: NewsItem[] }) {
+export function ActualityGrid({ items, content }: { items: NewsItem[]; content: NewsGridContent }) {
+  const FILTERS: { key: NewsCat | "all"; label: string }[] = [{ key: "all", label: content.allLabel }, ...content.categories];
   const [filter, setFilter] = useState<NewsCat | "all">("all");
   const list = filter === "all" ? items : items.filter((i) => i.cat === filter);
 
@@ -84,9 +70,9 @@ export function ActualityGrid({ items }: { items: NewsItem[] }) {
     <>
       <Reveal className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5">
         <h2 id="nwTitle" className="text-[clamp(30px,3.4vw,48px)] font-semibold leading-[1.08] tracking-[-0.035em] text-navy">
-          Toutes les <em className="not-italic text-brand">actualités</em>.
+          {rich(content.title, "not-italic text-brand")}
         </h2>
-        <div role="group" aria-label="Filtrer les actualités" className="flex flex-wrap gap-2">
+        <div role="group" aria-label={content.filterAriaLabel} className="flex flex-wrap gap-2">
           {FILTERS.map((f) => {
             const on = filter === f.key;
             return (
@@ -109,7 +95,7 @@ export function ActualityGrid({ items }: { items: NewsItem[] }) {
       </Reveal>
       <div className="mt-9 grid gap-x-[18px] gap-y-[22px] sm:grid-cols-2 lg:grid-cols-3">
         {list.map((i) => (
-          <NewsCard key={i.title} item={i} />
+          <NewsCard key={i.title} item={i} labels={content} />
         ))}
       </div>
     </>

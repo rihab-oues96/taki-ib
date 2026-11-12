@@ -5,10 +5,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
-import { NAV, SITE } from "@/lib/site";
+import type { Navigation, NavItem, SiteSettings } from "@/lib/content/global";
 import { ButtonLink } from "./ui";
 
-export function Header() {
+export function Header({ nav, site }: { nav: Navigation; site: SiteSettings }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -30,8 +30,7 @@ export function Header() {
   const active = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
   // A menu item with a dropdown is active when any of its children is the current page.
-  const itemActive = (item: (typeof NAV)[number]) =>
-    active(item.href) || ("children" in item && item.children.some((c) => active(c.href)));
+  const itemActive = (item: NavItem) => active(item.href) || item.children.some((c) => active(c.href));
 
   // Every page except Home uses the light header from the Figma design.
   const light = pathname !== "/";
@@ -49,13 +48,13 @@ export function Header() {
       }`}
     >
       <nav
-        aria-label="Navigation principale"
+        aria-label={nav.ariaLabel}
         className="mx-auto flex h-20 w-[min(1320px,100%-2rem)] items-center justify-between gap-8 sm:w-[min(1320px,100%-3rem)]"
       >
-        <Link href="/" aria-label={`${SITE.name} — accueil`} className="shrink-0">
+        <Link href="/" aria-label={`${site.name} — accueil`} className="shrink-0">
           <Image
-            src="/brand/logo-light.svg"
-            alt={SITE.name}
+            src={nav.logo}
+            alt={site.name}
             width={180}
             height={72}
             priority
@@ -69,7 +68,7 @@ export function Header() {
             light ? "text-navy" : "text-white"
           }`}
         >
-          {NAV.slice(0, -1).map((item) => (
+          {nav.items.map((item) => (
             <li key={item.href} className="group relative">
               <Link
                 href={item.href}
@@ -83,9 +82,9 @@ export function Header() {
                 }`}
               >
                 {item.label}
-                {"children" in item && <ChevronDown size={14} aria-hidden />}
+                {item.children.length > 0 && <ChevronDown size={14} aria-hidden />}
               </Link>
-              {"children" in item && (
+              {item.children.length > 0 && (
                 <div className="invisible absolute left-1/2 top-full w-72 -translate-x-1/2 translate-y-2 rounded-2xl bg-white p-2 text-navy opacity-0 shadow-2xl transition-all duration-300 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">
                   {item.children.map((c) => (
                     <Link
@@ -105,28 +104,28 @@ export function Header() {
         <div className="hidden items-center gap-3 lg:flex">
           {light ? (
             <>
-              <ButtonLink href="/contact-us" variant="line" className="h-10 px-4.5 text-[13.5px]">
-                Contactez-nous
+              <ButtonLink href={nav.contactCta.href} variant="line" className="h-10 px-4.5 text-[13.5px]">
+                {nav.contactCta.label}
               </ButtonLink>
-              <ButtonLink href={SITE.preRegistration} variant="brand" className="h-10 px-4.5 text-[13.5px]">
-                Pré-inscription
+              <ButtonLink href={nav.primaryCta.href} variant="brand" className="h-10 px-4.5 text-[13.5px]">
+                {nav.primaryCta.label}
               </ButtonLink>
             </>
           ) : (
             <>
               <ButtonLink
-                href="/contact-us"
+                href={nav.contactCta.href}
                 variant="ghost"
                 className="h-10 border-paper/32! bg-paper/8! px-4.5 text-[13.5px] font-semibold! backdrop-blur-[6px] hover:border-brand! hover:bg-brand!"
               >
-                Contactez-nous
+                {nav.contactCta.label}
               </ButtonLink>
               <ButtonLink
-                href={SITE.preRegistration}
+                href={nav.primaryCta.href}
                 variant="solid"
                 className="h-10 px-4.5 text-[13.5px] font-semibold!"
               >
-                Pré-inscription
+                {nav.primaryCta.label}
               </ButtonLink>
             </>
           )}
@@ -137,7 +136,7 @@ export function Header() {
           onClick={() => setOpen((o) => !o)}
           aria-expanded={open}
           aria-controls="mobile-menu"
-          aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
+          aria-label={open ? nav.closeMenuLabel : nav.openMenuLabel}
           className={`grid size-11 place-items-center rounded-full lg:hidden ${light ? "text-navy" : "text-white"}`}
         >
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -150,17 +149,7 @@ export function Header() {
           className={`h-[calc(100dvh-5rem)] overflow-y-auto px-6 pb-10 pt-4 lg:hidden ${light ? "bg-white text-navy" : "text-white"}`}
         >
           <ul className="space-y-1">
-            {[
-              { label: "Accueil", href: "/" },
-              { label: "Notre mission", href: "/mission" },
-              { label: "Éducation intermédiaire (PEI)", href: "/middle-education-program" },
-              { label: "Programme du diplôme (DP)", href: "/diploma-program" },
-              { label: "Vie scolaire", href: "/scholar-life" },
-              { label: "Notre équipe", href: "/notre-equipe" },
-              { label: "Politiques", href: "/establishment-policies" },
-              { label: "Actualités", href: "/actuality" },
-              { label: "Contact", href: "/contact-us" },
-            ].map((l) => (
+            {nav.mobileItems.map((l) => (
               <li key={l.href}>
                 <Link
                   href={l.href}
@@ -177,11 +166,11 @@ export function Header() {
             ))}
           </ul>
           <div className="mt-8 grid gap-3">
-            <ButtonLink href="/contact-us" variant={light ? "line" : "ghost"}>
-              Contactez-nous
+            <ButtonLink href={nav.contactCta.href} variant={light ? "line" : "ghost"}>
+              {nav.contactCta.label}
             </ButtonLink>
-            <ButtonLink href={SITE.preRegistration} variant={light ? "brand" : "solid"}>
-              Pré-inscription
+            <ButtonLink href={nav.primaryCta.href} variant={light ? "brand" : "solid"}>
+              {nav.primaryCta.label}
             </ButtonLink>
           </div>
         </div>
