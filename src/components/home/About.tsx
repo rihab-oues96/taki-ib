@@ -7,6 +7,7 @@ import { Reveal } from "@/components/Reveal";
 import { ButtonLink } from "@/components/ui";
 import { rich } from "@/components/Rich";
 import type { AboutContent } from "@/lib/content/home";
+import { isVideoFile } from "@/lib/content/videos";
 
 const DUR = 6000;
 const pad = (n: number) => String(n).padStart(2, "0");
@@ -291,13 +292,17 @@ export function About({ content: c }: { content: AboutContent }) {
             <button onClick={() => setVideo(false)} className="absolute -top-10 right-0 inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white">
               <X size={16} aria-hidden /> {L.close}
             </button>
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${c.videoId}?autoplay=1&rel=0`}
-              title={L.videoTitle}
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
-              className="absolute inset-0 size-full border-0"
-            />
+            {isVideoFile(c.videoId) ? (
+              <video src={c.videoId} title={L.videoTitle} controls autoPlay playsInline className="absolute inset-0 size-full" />
+            ) : (
+              <iframe
+                src={`https://www.youtube-nocookie.com/embed/${c.videoId}?autoplay=1&rel=0`}
+                title={L.videoTitle}
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+                className="absolute inset-0 size-full border-0"
+              />
+            )}
           </div>
         </div>
       )}
