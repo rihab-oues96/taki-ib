@@ -26,22 +26,38 @@ export class CmsError extends Error {
   }
 }
 
+/**
+ * `next build` prerenders pages from the API. If the API is waking up or restarting at that
+ * moment (a deploy of both projects at once, a host that sleeps when idle), the build waits
+ * for it instead of failing. Visitors never wait this long: at runtime there is one attempt.
+ */
+const BUILDING = process.env.NEXT_PHASE === "phase-production-build";
+const ATTEMPTS = BUILDING ? 8 : 1;
+const TIMEOUT_MS = BUILDING ? 30_000 : 10_000;
+const RETRY_DELAY_MS = 10_000;
+
 async function request<T>(path: string, preview: boolean): Promise<T> {
-  let res: Response;
-  try {
-    res = await fetch(`${API_URL}/api/public${path}`, {
-      headers: preview ? { "x-preview-secret": process.env.CMS_PREVIEW_SECRET ?? "" } : undefined,
-      signal: AbortSignal.timeout(10_000),
-    });
-  } catch {
-    throw new CmsError(`Le service de contenu est injoignable (${path})`);
+  let res: Response | undefined;
+  for (let attempt = 1; attempt <= ATTEMPTS; attempt++) {
+    try {
+      res = await fetch(`${API_URL}/api/public${path}`, {
+        headers: preview ? { "x-preview-secret": process.env.CMS_PREVIEW_SECRET ?? "" } : undefined,
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+      // 502/503/504: the host answers while the API itself is still starting.
+      if (res.status < 502 || res.status > 504) break;
+    } catch {
+      res = undefined;
+    }
+    if (attempt < ATTEMPTS) await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
   }
+  if (!res) throw new CmsError(`Le service de contenu est injoignable (${path})`);
   if (!res.ok) throw new CmsError(`Le service de contenu a répondu ${res.status} (${path})`, res.status);
   const body = (await res.json()) as { data: T };
   return videoIds(body.data);
 }
 
-/** Keys that hold a YouTube video: `id` (videos, testimonials, `video.id`), `videoId(s)`, `heroVideoId`… */
+/** Keys that hold a YouTube video: `id` (videos, testimonials, `video.id`), `videoId(s)`, `filmVideoId`… */
 const VIDEO_KEY = /^(id|youtubeId|videoIds?|[a-z]+VideoId)$/;
 
 /**

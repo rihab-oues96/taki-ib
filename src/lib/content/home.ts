@@ -29,6 +29,10 @@ export type HeroContent = {
   watchLabel: string;
   cta: Cta;
   video: {
+    /** YouTube id, or the address of an uploaded video file (`/uploads/….mp4`). */
+    backgroundVideoId: string;
+    /** YouTube id of the film opened by the "watch" button. */
+    filmVideoId: string;
     backgroundTitle: string;
     backgroundStart: number | null;
     playLabel: string;
@@ -46,6 +50,8 @@ export type AboutContent = {
   title: string;
   text: string;
   cta: Cta;
+  /** YouTube id of the video opened by the "video tour" button. */
+  videoId: string;
   slides: { name: string; icon: string; image: string; title: string; text: string; caption: string }[];
   stats: { value: string; label: string }[];
   /** `slide` is the 1-based position of the photo the shortcut opens. */

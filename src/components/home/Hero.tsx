@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { useSite } from "@/components/SiteProvider";
 import type { HeroContent } from "@/lib/content/home";
 import { isVideoFile } from "@/lib/content/videos";
 
@@ -27,7 +26,6 @@ function titleWords(line: string) {
 }
 
 export function Hero({ content: c }: { content: HeroContent }) {
-  const site = useSite();
   const reduce = useReducedMotion();
   const [playing, setPlaying] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -36,7 +34,7 @@ export function Hero({ content: c }: { content: HeroContent }) {
   const bg = useRef<HTMLIFrameElement>(null);
   const bgFile = useRef<HTMLVideoElement>(null);
   // The background is either a YouTube video or a file uploaded in the backoffice.
-  const isFile = isVideoFile(site.heroVideoId);
+  const isFile = isVideoFile(c.video.backgroundVideoId);
   const dock = useRef<HTMLElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   const chipEl = useRef<HTMLElement | null>(null);
@@ -140,12 +138,12 @@ export function Hero({ content: c }: { content: HeroContent }) {
       {/* Background video */}
       <div
         className="absolute inset-0 z-0 overflow-hidden bg-[#0b2230] bg-cover bg-center bg-no-repeat"
-        style={isFile ? undefined : { backgroundImage: `url('https://i.ytimg.com/vi/${site.heroVideoId}/maxresdefault.jpg')` }}
+        style={isFile ? undefined : { backgroundImage: `url('https://i.ytimg.com/vi/${c.video.backgroundVideoId}/maxresdefault.jpg')` }}
       >
         {isFile && (
           <video
             ref={bgFile}
-            src={site.heroVideoId}
+            src={c.video.backgroundVideoId}
             title={c.video.backgroundTitle}
             autoPlay={!reduce}
             muted
@@ -164,7 +162,7 @@ export function Hero({ content: c }: { content: HeroContent }) {
           <iframe
             ref={bg}
             title={c.video.backgroundTitle}
-            src={`https://www.youtube-nocookie.com/embed/${site.heroVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${site.heroVideoId}&start=${c.video.backgroundStart ?? 0}&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
+            src={`https://www.youtube-nocookie.com/embed/${c.video.backgroundVideoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${c.video.backgroundVideoId}&start=${c.video.backgroundStart ?? 0}&modestbranding=1&rel=0&playsinline=1&iv_load_policy=3&disablekb=1&enablejsapi=1`}
             allow="autoplay; encrypted-media; picture-in-picture"
             referrerPolicy="strict-origin-when-cross-origin"
             tabIndex={-1}
@@ -389,7 +387,7 @@ export function Hero({ content: c }: { content: HeroContent }) {
               {c.video.filmClose}
             </button>
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${site.filmVideoId}?autoplay=1&rel=0&modestbranding=1`}
+              src={`https://www.youtube-nocookie.com/embed/${c.video.filmVideoId}?autoplay=1&rel=0&modestbranding=1`}
               title={c.video.filmTitle}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen
@@ -397,7 +395,7 @@ export function Hero({ content: c }: { content: HeroContent }) {
               className="absolute inset-0 size-full border-0"
             />
             <a
-              href={`https://www.youtube.com/watch?v=${site.filmVideoId}`}
+              href={`https://www.youtube.com/watch?v=${c.video.filmVideoId}`}
               target="_blank"
               rel="noopener noreferrer"
               className="absolute inset-x-0 -bottom-10 text-center text-[13.5px] text-paper/75 underline underline-offset-[3px] hover:text-brand"
