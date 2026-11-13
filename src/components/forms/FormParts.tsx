@@ -64,14 +64,14 @@ export function Field({
 
 /**
  * A field people never see or reach with the keyboard. Robots that fill every input give
- * themselves away; the API then drops the submission.
+ * themselves away; the API then flags the submission for the team to check.
  */
 export function Honeypot() {
   return (
     <div aria-hidden className="absolute -left-[9999px] top-auto h-px w-px overflow-hidden">
       <label>
         Site web (ne pas remplir)
-        <input name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+        <input name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" />
       </label>
     </div>
   );
