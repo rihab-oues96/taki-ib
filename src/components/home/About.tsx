@@ -6,14 +6,12 @@ import { ChevronLeft, ChevronRight, Pause, Play, X } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ButtonLink } from "@/components/ui";
 import { rich } from "@/components/Rich";
-import { useSite } from "@/components/SiteProvider";
 import type { AboutContent } from "@/lib/content/home";
 
 const DUR = 6000;
 const pad = (n: number) => String(n).padStart(2, "0");
 
 export function About({ content: c }: { content: AboutContent }) {
-  const site = useSite();
   const SLIDES = c.slides;
   const L = c.labels;
   const [cur, setCur] = useState(0);
@@ -294,7 +292,7 @@ export function About({ content: c }: { content: AboutContent }) {
               <X size={16} aria-hidden /> {L.close}
             </button>
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${site.filmVideoId}?autoplay=1&rel=0`}
+              src={`https://www.youtube-nocookie.com/embed/${c.videoId}?autoplay=1&rel=0`}
               title={L.videoTitle}
               allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
               allowFullScreen

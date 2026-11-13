@@ -57,7 +57,7 @@ async function request<T>(path: string, preview: boolean): Promise<T> {
   return videoIds(body.data);
 }
 
-/** Keys that hold a YouTube video: `id` (videos, testimonials, `video.id`), `videoId(s)`, `heroVideoId`… */
+/** Keys that hold a YouTube video: `id` (videos, testimonials, `video.id`), `videoId(s)`, `filmVideoId`… */
 const VIDEO_KEY = /^(id|youtubeId|videoIds?|[a-z]+VideoId)$/;
 
 /**
