@@ -386,22 +386,35 @@ export function Hero({ content: c }: { content: HeroContent }) {
             >
               {c.video.filmClose}
             </button>
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${c.video.filmVideoId}?autoplay=1&rel=0&modestbranding=1`}
-              title={c.video.filmTitle}
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
-              referrerPolicy="strict-origin-when-cross-origin"
-              className="absolute inset-0 size-full border-0"
-            />
-            <a
-              href={`https://www.youtube.com/watch?v=${c.video.filmVideoId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="absolute inset-x-0 -bottom-10 text-center text-[13.5px] text-paper/75 underline underline-offset-[3px] hover:text-brand"
-            >
-              {c.video.filmFallback}
-            </a>
+            {isVideoFile(c.video.filmVideoId) ? (
+              <video
+                src={c.video.filmVideoId}
+                title={c.video.filmTitle}
+                controls
+                autoPlay
+                playsInline
+                className="absolute inset-0 size-full"
+              />
+            ) : (
+              <>
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${c.video.filmVideoId}?autoplay=1&rel=0&modestbranding=1`}
+                  title={c.video.filmTitle}
+                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  className="absolute inset-0 size-full border-0"
+                />
+                <a
+                  href={`https://www.youtube.com/watch?v=${c.video.filmVideoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-x-0 -bottom-10 text-center text-[13.5px] text-paper/75 underline underline-offset-[3px] hover:text-brand"
+                >
+                  {c.video.filmFallback}
+                </a>
+              </>
+            )}
           </div>
         </div>
       )}

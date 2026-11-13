@@ -31,7 +31,7 @@ export type HeroContent = {
   video: {
     /** YouTube id, or the address of an uploaded video file (`/uploads/….mp4`). */
     backgroundVideoId: string;
-    /** YouTube id of the film opened by the "watch" button. */
+    /** Film opened by the "watch" button: YouTube id, or the address of an uploaded video file. */
     filmVideoId: string;
     backgroundTitle: string;
     backgroundStart: number | null;
@@ -50,7 +50,7 @@ export type AboutContent = {
   title: string;
   text: string;
   cta: Cta;
-  /** YouTube id of the video opened by the "video tour" button. */
+  /** Video opened by the "video tour" button: YouTube id, or the address of an uploaded video file. */
   videoId: string;
   slides: { name: string; icon: string; image: string; title: string; text: string; caption: string }[];
   stats: { value: string; label: string }[];
